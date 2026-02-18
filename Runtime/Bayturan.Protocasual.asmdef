@@ -1,0 +1,12 @@
+{
+    "name": "Bayturan.Protocasual",
+    "rootNamespace": "ProtoCasual.Core",
+    "references": [
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "autoReferenced": true
+}

@@ -1,0 +1,24 @@
+{
+	"name": "com.bayturan.protocasual",
+	"displayName": "Proto Casual",
+	"version": "0.2.0",
+	"unity": "6000.3",
+	"unityRelease": "8f1",
+	"description": "Game Factory Framework for casual mobile games.\n\n▪ Genre-agnostic architecture (HyperCasual, Puzzle, Racing, Endless, Hybrid)\n▪ GameMode-driven design with plug-in mechanics\n▪ ScriptableObject-based configuration\n▪ Built-in managers: Game, UI, Input, Audio, Economy, Inventory, Equipment, Level, Save\n▪ Monetization-ready (Ads, IAP interfaces)\n▪ Single scene architecture\n▪ Clone-and-ship ready",
+	"dependencies": {
+		"com.unity.test-framework": "1.6.0",
+		"com.unity.textmeshpro": "3.0.6"
+	},
+	"samples": [
+		{
+			"displayName": "Example Game",
+			"description": "Sample game modes, SDK integrations, bots, and content showing how to use the framework.",
+			"path": "Samples~/Example"
+		}
+	],
+	"author": {
+		"name": "Bayturan",
+		"url": "http://www.example.com",
+		"email": "example@email.com"
+	}
+}
