@@ -2,26 +2,31 @@ using UnityEngine;
 
 namespace ProtoCasual.Core.ScriptableObjects
 {
-    public enum ItemType { Consumable, Skin, PowerUp, Equipment }
+    public enum ItemType { Consumable, Cosmetic, Equipment, Currency }
 
     [CreateAssetMenu(menuName = "ProtoCasual/Economy/Item Config")]
     public class ItemConfig : ScriptableObject
     {
-        [Header("Basic Info")]
-        public string itemId;
-        public string itemName;
-        public string description;
-        public Sprite icon;
-        public ItemType itemType;
+        [Header("Identity")]
+        public string Id;
+        public string DisplayName;
+        [TextArea] public string Description;
+        public Sprite Icon;
+        public ItemType Type;
+        public string Category;
 
         [Header("Economy")]
-        public int price;
-        public string currencyType = "Coins";
-        public bool isPremium;
+        public int SoftCurrencyPrice;
+        public int HardCurrencyPrice;
 
-        [Header("Gameplay")]
-        public GameObject prefab;
-        public float effectValue;
-        public float effectDuration;
+        [Header("Behaviour")]
+        public bool IsStackable = true;
+        public bool IsEquippable;
+
+        [Header("Gameplay (optional)")]
+        public GameObject Prefab;
+        public float EffectValue;
+        public float EffectDuration;
     }
 }
+

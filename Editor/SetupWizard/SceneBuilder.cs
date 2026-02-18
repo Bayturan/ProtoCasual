@@ -57,9 +57,6 @@ namespace ProtoCasual.Editor
             var level = CreateChild("LevelManager", managers);
             level.AddComponent<LevelManager>();
 
-            var economy = CreateChild("EconomyManager", managers);
-            economy.AddComponent<EconomyManager>();
-
             var save = CreateChild("SaveService", managers);
             save.AddComponent<SaveService>();
 
@@ -73,15 +70,8 @@ namespace ProtoCasual.Editor
                 CreateChild("IAPManager", managers);
             }
 
-            // Store / Inventory
-            if (cfg.store == StoreOption.Enabled)
-            {
-                var inv = CreateChild("InventoryManager", managers);
-                inv.AddComponent<InventoryManager>();
-                var equip = CreateChild("EquipmentManager", managers);
-                equip.AddComponent<EquipmentManager>();
-                CreateChild("StoreManager", managers);
-            }
+            // Store / Inventory (services — no MonoBehaviour needed)
+            // Wired automatically by GameBootstrap via ServiceLocator
 
             // Input
             var inputGO = CreateChild("InputManager", managers);

@@ -201,11 +201,11 @@ namespace ProtoCasual.Editor
 
         private static int CountManagers(GameSetupConfig cfg)
         {
-            // Base: GameManager, GameModeManager, AudioManager, LevelManager, EconomyManager, SaveService, InputManager = 7
-            int count = 7;
+            // Base: GameManager, GameModeManager, AudioManager, LevelManager, SaveService, InputManager = 6
+            // + Services (non-MonoBehaviour): CurrencyService, InventoryService, StoreService, PlayerDataProvider = 4
+            int count = 10;
             if (cfg.monetization == MonetizationType.AdsOnly || cfg.monetization == MonetizationType.AdsPlusIAP) count++;
             if (cfg.monetization == MonetizationType.IAPOnly || cfg.monetization == MonetizationType.AdsPlusIAP) count++;
-            if (cfg.store == StoreOption.Enabled) count += 3; // InventoryManager, EquipmentManager, StoreManager
             return count;
         }
     }
