@@ -10,24 +10,22 @@ namespace ProtoCasual.Core.UI
         [Header("Buttons")]
         [SerializeField] private Button playButton;
         [SerializeField] private Button storeButton;
+        [SerializeField] private Button inventoryButton;
         [SerializeField] private Button settingsButton;
 
         protected override void OnInitialize()
         {
             if (playButton != null)
-            {
                 playButton.onClick.AddListener(OnPlayClicked);
-            }
 
             if (storeButton != null)
-            {
                 storeButton.onClick.AddListener(OnStoreClicked);
-            }
+
+            if (inventoryButton != null)
+                inventoryButton.onClick.AddListener(OnInventoryClicked);
 
             if (settingsButton != null)
-            {
                 settingsButton.onClick.AddListener(OnSettingsClicked);
-            }
         }
 
         private void OnPlayClicked()
@@ -37,7 +35,12 @@ namespace ProtoCasual.Core.UI
 
         private void OnStoreClicked()
         {
-            UIManager.Instance.ShowScreen("Store");
+            UIManager.Instance.ShowScreen(nameof(StoreScreen));
+        }
+
+        private void OnInventoryClicked()
+        {
+            UIManager.Instance.ShowScreen(nameof(InventoryScreen));
         }
 
         private void OnSettingsClicked()

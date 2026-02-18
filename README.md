@@ -382,11 +382,13 @@ public class MyCustomScreen : UIScreen
 
 | Screen | Key Features |
 |---|---|
-| `MenuScreen` | Play, Store, Settings buttons |
+| `MenuScreen` | Play, Store, Inventory, Settings buttons |
 | `GameplayScreen` | Score text, time text, pause button, progress slider |
 | `WinScreen` | Score, time, Next Level / Restart / Menu buttons |
 | `LoseScreen` | Retry, Menu, Watch Ad (rewarded) buttons |
 | `PauseScreen` | Resume, Restart, Quit buttons |
+| `StoreScreen` | Browse items, buy with soft/hard currency, detail panel, live currency display |
+| `InventoryScreen` | View owned items, quantity badges, detail panel, empty state |
 
 ---
 
@@ -563,6 +565,91 @@ var cosmetics = db.GetByType(ItemType.Cosmetic);
 
 // All items
 IReadOnlyList<ItemConfig> all = db.All;
+```
+
+### StoreScreen
+
+A full-featured store UI that lets the player browse and purchase items. Extends `UIScreen`.
+
+**Features:**
+- Displays all items from `ItemDatabase` in a scrollable list
+- Detail panel with icon, name, description, and price on item tap
+- Separate **Buy (Coins)** and **Buy (Gems)** buttons
+- Live currency balance header (soft + hard)
+- Greys out already-owned non-stackable items
+- Feedback text for purchase success/failure
+- Auto-refreshes on `OnPurchaseCompleted` and `OnCurrencyChanged`
+
+**Inspector fields:**
+
+| Field | Type | Description |
+|---|---|---|
+| `itemDatabase` | ItemDatabase | Reference to the item catalogue |
+| `softCurrencyText` | TMP_Text | Displays coin balance |
+| `hardCurrencyText` | TMP_Text | Displays gem balance |
+| `itemContainer` | Transform | Parent for spawned item entries |
+| `storeItemPrefab` | GameObject | Prefab for each store item row (needs Image, TMP_Text, Button) |
+| `detailPanel` | GameObject | Panel shown when an item is selected |
+| `detailIcon` | Image | Item icon in detail panel |
+| `detailName` | TMP_Text | Item name in detail panel |
+| `detailDescription` | TMP_Text | Item description in detail panel |
+| `detailPrice` | TMP_Text | Price label in detail panel |
+| `buySoftButton` | Button | Purchase with soft currency |
+| `buyHardButton` | Button | Purchase with hard currency |
+| `closeButton` | Button | Returns to MenuScreen |
+| `feedbackText` | TMP_Text | Shows "Purchased!" or "Not enough currency!" |
+
+**Prefab requirements for `storeItemPrefab`:**
+- `Image` component (child) — receives the item icon
+- `TextMeshProUGUI` component (child) — receives the display name
+- `Button` component (root or child) — handles item selection
+
+**Navigation:**
+
+```csharp
+// Open from any screen
+UIManager.Instance.ShowScreen(nameof(StoreScreen));
+```
+
+### InventoryScreen
+
+Displays the player's owned items with quantities. Extends `UIScreen`.
+
+**Features:**
+- Lists all items from `IInventoryService.GetAll()`
+- Resolves display info (icon, name, description) from `ItemDatabase`
+- Shows quantity badges (`x3`) for stackable items
+- Detail panel with item type and owned count
+- Empty state panel when inventory is empty
+- Auto-refreshes on `OnInventoryChanged`
+
+**Inspector fields:**
+
+| Field | Type | Description |
+|---|---|---|
+| `itemDatabase` | ItemDatabase | Resolves display info for item IDs |
+| `itemContainer` | Transform | Parent for spawned inventory entries |
+| `inventoryItemPrefab` | GameObject | Prefab for each inventory row (needs Image, TMP_Text, Button) |
+| `detailPanel` | GameObject | Panel shown when an item is selected |
+| `detailIcon` | Image | Item icon in detail panel |
+| `detailName` | TMP_Text | Item name |
+| `detailDescription` | TMP_Text | Item description |
+| `detailQuantity` | TMP_Text | "Owned: 5" |
+| `detailType` | TMP_Text | Item type (Consumable, Cosmetic, etc.) |
+| `emptyStatePanel` | GameObject | Shown when inventory is empty |
+| `emptyStateText` | TMP_Text | "No items yet. Visit the Store!" |
+| `closeButton` | Button | Returns to MenuScreen |
+
+**Prefab requirements for `inventoryItemPrefab`:**
+- `Image` component (child) — receives the item icon
+- `TextMeshProUGUI` component (child) — receives name + quantity
+- `Button` component (root or child) — handles item selection
+
+**Navigation:**
+
+```csharp
+// Open from any screen
+UIManager.Instance.ShowScreen(nameof(InventoryScreen));
 ```
 
 ---
