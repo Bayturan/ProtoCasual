@@ -3,7 +3,7 @@ using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections;
 
-namespace Bayturan.Protocasual.Tests 
+namespace ProtoCasual.Tests 
 {
 	
 	class RuntimeExampleTest 

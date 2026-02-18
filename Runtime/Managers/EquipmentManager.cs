@@ -90,10 +90,7 @@ namespace ProtoCasual.Core.Managers
 
         private void SaveEquipment()
         {
-            if (saveService != null)
-            {
-                saveService.Save("Equipment", equipmentData);
-            }
+            saveService?.Save("Equipment", equipmentData);
         }
     }
 }

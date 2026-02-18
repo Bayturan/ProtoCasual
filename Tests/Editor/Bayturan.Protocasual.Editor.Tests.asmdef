@@ -3,7 +3,9 @@
     "rootNamespace": "ProtoCasual.Editor.Tests",
     "references": [
         "Bayturan.Protocasual.Editor",
-        "Bayturan.Protocasual"
+        "Bayturan.Protocasual",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
     ],
     "includePlatforms": [
         "Editor"

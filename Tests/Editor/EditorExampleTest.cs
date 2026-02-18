@@ -4,7 +4,7 @@ using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections;
 
-namespace Bayturan.Protocasual.Editor.Tests 
+namespace ProtoCasual.Editor.Tests 
 {
 	
 	class EditorExampleTest 
