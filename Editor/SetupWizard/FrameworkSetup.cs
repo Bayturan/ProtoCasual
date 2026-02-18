@@ -79,6 +79,17 @@ namespace ProtoCasual.Editor
             DrawEnumSection("🎯 Input Type", ref config.inputType);
             DrawEnumSection("📱 Platform", ref config.platform);
 
+            EditorGUILayout.Space(8);
+            EditorGUILayout.LabelField("Optional Systems", EditorStyles.boldLabel);
+            config.enableHaptics = EditorGUILayout.Toggle("📳 Haptics", config.enableHaptics);
+            config.enableAnalytics = EditorGUILayout.Toggle("📊 Analytics", config.enableAnalytics);
+            config.enableRewards = EditorGUILayout.Toggle("🎁 Reward System", config.enableRewards);
+            config.enableDailyRewards = EditorGUILayout.Toggle("📅 Daily Rewards", config.enableDailyRewards);
+            config.enableTutorial = EditorGUILayout.Toggle("📖 Tutorial System", config.enableTutorial);
+            config.enableLeaderboards = EditorGUILayout.Toggle("🏆 Leaderboards", config.enableLeaderboards);
+            config.enableAchievements = EditorGUILayout.Toggle("🏅 Achievements", config.enableAchievements);
+            config.enablePopups = EditorGUILayout.Toggle("💬 Popup System", config.enablePopups);
+
             if (EditorGUI.EndChangeCheck())
                 confirmed = false;
         }
@@ -106,6 +117,14 @@ namespace ProtoCasual.Editor
             DrawSummaryLine("Store", config.store.ToString());
             DrawSummaryLine("Input", config.inputType.ToString());
             DrawSummaryLine("Platform", config.platform.ToString());
+            DrawSummaryLine("Haptics", config.enableHaptics ? "✓" : "—");
+            DrawSummaryLine("Analytics", config.enableAnalytics ? "✓" : "—");
+            DrawSummaryLine("Rewards", config.enableRewards ? "✓" : "—");
+            DrawSummaryLine("Daily Rewards", config.enableDailyRewards ? "✓" : "—");
+            DrawSummaryLine("Tutorial", config.enableTutorial ? "✓" : "—");
+            DrawSummaryLine("Leaderboards", config.enableLeaderboards ? "✓" : "—");
+            DrawSummaryLine("Achievements", config.enableAchievements ? "✓" : "—");
+            DrawSummaryLine("Popups", config.enablePopups ? "✓" : "—");
 
             int managerCount = CountManagers(config);
             DrawSummaryLine("Scenes", "2 (Main + InGame)");
@@ -194,6 +213,14 @@ namespace ProtoCasual.Editor
             Debug.Log($"  Store         : {cfg.store}");
             Debug.Log($"  Input         : {cfg.inputType}");
             Debug.Log($"  Platform      : {cfg.platform}");
+            Debug.Log($"  Haptics       : {cfg.enableHaptics}");
+            Debug.Log($"  Analytics     : {cfg.enableAnalytics}");
+            Debug.Log($"  Rewards       : {cfg.enableRewards}");
+            Debug.Log($"  Daily Rewards : {cfg.enableDailyRewards}");
+            Debug.Log($"  Tutorial      : {cfg.enableTutorial}");
+            Debug.Log($"  Leaderboards  : {cfg.enableLeaderboards}");
+            Debug.Log($"  Achievements  : {cfg.enableAchievements}");
+            Debug.Log($"  Popups        : {cfg.enablePopups}");
             Debug.Log($"  Scenes Created: 2 (Main + InGame)");
             Debug.Log($"  Managers      : {managerCount}");
             Debug.Log("═══════════════════════════════════════════════════");
@@ -206,6 +233,14 @@ namespace ProtoCasual.Editor
             int count = 10;
             if (cfg.monetization == MonetizationType.AdsOnly || cfg.monetization == MonetizationType.AdsPlusIAP) count++;
             if (cfg.monetization == MonetizationType.IAPOnly || cfg.monetization == MonetizationType.AdsPlusIAP) count++;
+            if (cfg.enableHaptics) count++;
+            if (cfg.enableAnalytics) count++;
+            if (cfg.enableRewards) count++;
+            if (cfg.enableDailyRewards) count++;
+            if (cfg.enableTutorial) count++;
+            if (cfg.enableLeaderboards) count++;
+            if (cfg.enableAchievements) count++;
+            if (cfg.enablePopups) count++;
             return count;
         }
     }

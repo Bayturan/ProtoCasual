@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEditor;
 using System.IO;
 using ProtoCasual.Core.ScriptableObjects;
+using ProtoCasual.Core.Interfaces;
 
 namespace ProtoCasual.Editor
 {
@@ -50,6 +51,12 @@ namespace ProtoCasual.Editor
 
             if (cfg.store == StoreOption.Enabled)
                 CreateDir($"{root}/Content/Store");
+
+            if (cfg.enableTutorial)
+                CreateDir($"{root}/Content/Tutorial");
+
+            if (cfg.enableAchievements)
+                CreateDir($"{root}/Content/Achievements");
 
             AssetDatabase.Refresh();
             Debug.Log("[ProtoCasual] Project folders created.");
@@ -108,6 +115,85 @@ namespace ProtoCasual.Editor
                     bc.reactionTime = cfg.bots == BotOption.AdvancedAI ? 0.1f : 0.3f;
                     bc.errorMargin = cfg.bots == BotOption.AdvancedAI ? 0.2f : 0.6f;
                     bc.useRubberBanding = true;
+                });
+            }
+
+            // HapticConfig
+            if (cfg.enableHaptics)
+            {
+                CreateAssetIfMissing<HapticConfig>($"{soDir}/HapticConfig.asset", hc =>
+                {
+                    hc.enabled = true;
+                });
+            }
+
+            // AnalyticsConfig
+            if (cfg.enableAnalytics)
+            {
+                CreateAssetIfMissing<AnalyticsConfig>($"{soDir}/AnalyticsConfig.asset", ac =>
+                {
+                    ac.enabled = true;
+                    ac.debugLogging = true;
+                });
+            }
+
+            // DailyRewardConfig
+            if (cfg.enableDailyRewards)
+            {
+                CreateAssetIfMissing<DailyRewardConfig>($"{soDir}/DailyRewardConfig.asset", drc =>
+                {
+                    drc.cycleDays = 7;
+                    drc.streakExpiryHours = 48;
+                    drc.days = new DayReward[]
+                    {
+                        new DayReward { label = "Day 1", rewards = new[] { new RewardEntry { Type = RewardType.SoftCurrency, Amount = 100 } } },
+                        new DayReward { label = "Day 2", rewards = new[] { new RewardEntry { Type = RewardType.SoftCurrency, Amount = 150 } } },
+                        new DayReward { label = "Day 3", rewards = new[] { new RewardEntry { Type = RewardType.SoftCurrency, Amount = 200 } } },
+                        new DayReward { label = "Day 4", rewards = new[] { new RewardEntry { Type = RewardType.SoftCurrency, Amount = 300 } } },
+                        new DayReward { label = "Day 5", rewards = new[] { new RewardEntry { Type = RewardType.HardCurrency, Amount = 5 } } },
+                        new DayReward { label = "Day 6", rewards = new[] { new RewardEntry { Type = RewardType.SoftCurrency, Amount = 500 } } },
+                        new DayReward { label = "Day 7", rewards = new[] { new RewardEntry { Type = RewardType.HardCurrency, Amount = 15 } } },
+                    };
+                });
+            }
+
+            // TutorialConfig
+            if (cfg.enableTutorial)
+            {
+                CreateAssetIfMissing<TutorialConfig>($"{soDir}/TutorialConfig.asset", tc =>
+                {
+                    tc.autoStart = true;
+                    tc.allowSkip = true;
+                    tc.steps = new TutorialStepData[]
+                    {
+                        new TutorialStepData { stepId = "welcome", title = "Welcome!", message = "Tap to continue.", completeOnTap = true },
+                        new TutorialStepData { stepId = "gameplay", title = "How to Play", message = "Tap anywhere to play.", completeOnTap = true },
+                    };
+                });
+            }
+
+            // LeaderboardConfig
+            if (cfg.enableLeaderboards)
+            {
+                CreateAssetIfMissing<LeaderboardConfig>($"{soDir}/LeaderboardConfig.asset", lc =>
+                {
+                    lc.leaderboards = new LeaderboardDefinition[]
+                    {
+                        new LeaderboardDefinition { leaderboardId = "main", displayName = "High Scores", maxEntries = 100, descending = true }
+                    };
+                });
+            }
+
+            // AchievementConfig
+            if (cfg.enableAchievements)
+            {
+                CreateAssetIfMissing<AchievementConfig>($"{soDir}/AchievementConfig.asset", ac =>
+                {
+                    ac.achievements = new AchievementDefinition[]
+                    {
+                        new AchievementDefinition { achievementId = "first_win", displayName = "First Win", description = "Complete a level.", requiredProgress = 1 },
+                        new AchievementDefinition { achievementId = "collector", displayName = "Collector", description = "Own 10 items.", requiredProgress = 10 },
+                    };
                 });
             }
 

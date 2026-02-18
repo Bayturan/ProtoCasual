@@ -82,9 +82,22 @@ namespace ProtoCasual.Editor
             canvasGO.AddComponent<UIManager>();
 
             CreateScreenChild("MenuScreen", canvasGO, typeof(MenuScreen));
-            CreateScreenChild("SettingsScreen", canvasGO, null);
+            CreateScreenChild("SettingsScreen", canvasGO, typeof(SettingsScreen));
             if (cfg.store == StoreOption.Enabled)
-                CreateScreenChild("StoreScreen", canvasGO, null);
+            {
+                CreateScreenChild("StoreScreen", canvasGO, typeof(StoreScreen));
+                CreateScreenChild("InventoryScreen", canvasGO, typeof(InventoryScreen));
+            }
+
+            // ── Popup Canvas (higher sort order) ──
+            if (cfg.enablePopups)
+            {
+                var popupCanvas = CreateCanvas("PopupCanvas");
+                popupCanvas.GetComponent<Canvas>().sortingOrder = 200;
+                popupCanvas.AddComponent<PopupManager>();
+                CreateScreenChild("ConfirmPopup", popupCanvas, typeof(ConfirmPopup));
+                CreateScreenChild("RewardPopup", popupCanvas, typeof(RewardPopup));
+            }
 
             // ── EventSystem ──
             EnsureEventSystem();

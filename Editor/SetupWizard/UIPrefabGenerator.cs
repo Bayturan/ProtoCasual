@@ -28,6 +28,12 @@ namespace ProtoCasual.Editor
 
             CreateScreenPrefab("SettingsScreen", BuildSettingsScreen);
 
+            if (cfg.enablePopups)
+            {
+                CreateScreenPrefab("ConfirmPopup", BuildConfirmPopup);
+                CreateScreenPrefab("RewardPopup", BuildRewardPopup);
+            }
+
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             Debug.Log("[ProtoCasual] UI prefabs created.");
@@ -115,11 +121,71 @@ namespace ProtoCasual.Editor
             AddButton(root, "CloseButton", "X",
                 new Vector2(380, 400), new Vector2(60, 60));
 
-            // Toggle placeholders
-            AddText(root, "SoundLabel", "Sound", 28, TextAlignmentOptions.Left,
-                new Vector2(-100, 100), new Vector2(200, 40));
+            // Music toggle
+            AddText(root, "MusicLabel", "Music", 28, TextAlignmentOptions.Left,
+                new Vector2(-100, 140), new Vector2(200, 40));
+            AddToggle(root, "MusicToggle", true, new Vector2(200, 140));
+
+            // SFX toggle
+            AddText(root, "SfxLabel", "SFX", 28, TextAlignmentOptions.Left,
+                new Vector2(-100, 80), new Vector2(200, 40));
+            AddToggle(root, "SfxToggle", true, new Vector2(200, 80));
+
+            // Vibration toggle
             AddText(root, "VibrationLabel", "Vibration", 28, TextAlignmentOptions.Left,
-                new Vector2(-100, 40), new Vector2(200, 40));
+                new Vector2(-100, 20), new Vector2(200, 40));
+            AddToggle(root, "VibrationToggle", true, new Vector2(200, 20));
+
+            // Reset button
+            AddButton(root, "ResetDataButton", "RESET DATA",
+                new Vector2(0, -120), new Vector2(300, 60));
+        }
+
+        private static void BuildConfirmPopup(GameObject root)
+        {
+            AddBackground(root, new Color(0f, 0f, 0f, 0.75f));
+            // Panel
+            var panel = new GameObject("Panel");
+            panel.transform.SetParent(root.transform, false);
+            var prt = panel.AddComponent<RectTransform>();
+            prt.anchoredPosition = Vector2.zero;
+            prt.sizeDelta = new Vector2(600, 400);
+            var pimg = panel.AddComponent<Image>();
+            pimg.color = new Color(0.15f, 0.15f, 0.2f, 1f);
+
+            AddText(panel, "TitleText", "Confirm", 36, TextAlignmentOptions.Center,
+                new Vector2(0, 120), new Vector2(500, 50));
+            AddText(panel, "MessageText", "Are you sure?", 24, TextAlignmentOptions.Center,
+                new Vector2(0, 30), new Vector2(500, 80));
+            AddButton(panel, "ConfirmButton", "OK",
+                new Vector2(-110, -100), new Vector2(180, 50));
+            AddButton(panel, "CancelButton", "CANCEL",
+                new Vector2(110, -100), new Vector2(180, 50));
+        }
+
+        private static void BuildRewardPopup(GameObject root)
+        {
+            AddBackground(root, new Color(0f, 0f, 0f, 0.75f));
+            var panel = new GameObject("Panel");
+            panel.transform.SetParent(root.transform, false);
+            var prt = panel.AddComponent<RectTransform>();
+            prt.anchoredPosition = Vector2.zero;
+            prt.sizeDelta = new Vector2(600, 500);
+            var pimg = panel.AddComponent<Image>();
+            pimg.color = new Color(0.1f, 0.15f, 0.25f, 1f);
+
+            AddText(panel, "TitleText", "REWARD!", 48, TextAlignmentOptions.Center,
+                new Vector2(0, 170), new Vector2(500, 60));
+
+            // Content container for reward entries
+            var content = new GameObject("RewardContainer");
+            content.transform.SetParent(panel.transform, false);
+            var crt = content.AddComponent<RectTransform>();
+            crt.anchoredPosition = new Vector2(0, 20);
+            crt.sizeDelta = new Vector2(400, 200);
+
+            AddButton(panel, "CollectButton", "COLLECT",
+                new Vector2(0, -160), new Vector2(300, 60));
         }
 
         // ─── Shared builder helpers ─────────────────────────────────────
@@ -188,6 +254,36 @@ namespace ProtoCasual.Editor
             // Button label
             AddText(go, "Label", label, 24, TextAlignmentOptions.Center, Vector2.zero, size);
             return btn;
+        }
+
+        private static Toggle AddToggle(GameObject parent, string name, bool defaultOn, Vector2 pos)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(parent.transform, false);
+            var rt = go.AddComponent<RectTransform>();
+            rt.anchoredPosition = pos;
+            rt.sizeDelta = new Vector2(60, 40);
+
+            var bg = new GameObject("Background");
+            bg.transform.SetParent(go.transform, false);
+            var bgRt = bg.AddComponent<RectTransform>();
+            bgRt.sizeDelta = new Vector2(60, 40);
+            var bgImg = bg.AddComponent<Image>();
+            bgImg.color = new Color(0.3f, 0.3f, 0.3f, 1f);
+
+            var checkmark = new GameObject("Checkmark");
+            checkmark.transform.SetParent(bg.transform, false);
+            var cmRt = checkmark.AddComponent<RectTransform>();
+            cmRt.sizeDelta = new Vector2(40, 30);
+            var cmImg = checkmark.AddComponent<Image>();
+            cmImg.color = new Color(0.2f, 0.8f, 0.4f, 1f);
+
+            var toggle = go.AddComponent<Toggle>();
+            toggle.targetGraphic = bgImg;
+            toggle.graphic = cmImg;
+            toggle.isOn = defaultOn;
+
+            return toggle;
         }
 
         private static void EnsureDir(string path)

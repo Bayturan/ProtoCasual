@@ -55,10 +55,14 @@ namespace ProtoCasual.Core.Data
         {
             return new PlayerData
             {
-                Version = 1,
+                Version = 2,
                 Currency = new CurrencyData { SoftCurrency = 0, HardCurrency = 0 },
                 Inventory = new InventoryData(),
-                Equipment = new EquipmentData()
+                Equipment = new EquipmentData(),
+                DailyReward = new DailyRewardData(),
+                Tutorial = new TutorialSaveData(),
+                Leaderboards = new LeaderboardSaveData(),
+                Achievements = new AchievementSaveData()
             };
         }
     }

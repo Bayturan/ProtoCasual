@@ -27,5 +27,15 @@ namespace ProtoCasual.Editor
         public StoreOption store = StoreOption.Disabled;
         public InputType inputType = InputType.Tap;
         public TargetPlatform platform = TargetPlatform.Both;
+
+        // ── Optional systems ──
+        public bool enableHaptics = true;
+        public bool enableAnalytics = true;
+        public bool enableRewards = true;
+        public bool enableDailyRewards;
+        public bool enableTutorial;
+        public bool enableLeaderboards;
+        public bool enableAchievements;
+        public bool enablePopups = true;
     }
 }

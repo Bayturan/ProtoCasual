@@ -5,6 +5,12 @@ using ProtoCasual.Core.Data;
 using ProtoCasual.Core.Currency;
 using ProtoCasual.Core.Inventory;
 using ProtoCasual.Core.Store;
+using ProtoCasual.Core.Haptics;
+using ProtoCasual.Core.Rewards;
+using ProtoCasual.Core.Analytics;
+using ProtoCasual.Core.Tutorial;
+using ProtoCasual.Core.Leaderboard;
+using ProtoCasual.Core.Achievements;
 
 namespace ProtoCasual.Core.Bootstrap
 {
@@ -14,8 +20,26 @@ namespace ProtoCasual.Core.Bootstrap
     /// </summary>
     public class GameBootstrap : MonoBehaviour
     {
+        [Header("Core")]
         [SerializeField] private GameConfig gameConfig;
         [SerializeField] private ItemDatabase itemDatabase;
+
+        [Header("Haptics")]
+        [SerializeField] private HapticConfig hapticConfig;
+
+        [Header("Economy")]
+        [SerializeField] private RewardConfig[] rewardConfigs;
+        [SerializeField] private DailyRewardConfig dailyRewardConfig;
+
+        [Header("Analytics")]
+        [SerializeField] private AnalyticsConfig analyticsConfig;
+
+        [Header("Tutorial")]
+        [SerializeField] private TutorialConfig tutorialConfig;
+
+        [Header("Social")]
+        [SerializeField] private LeaderboardConfig leaderboardConfig;
+        [SerializeField] private AchievementConfig achievementConfig;
 
         private void Awake()
         {
@@ -69,6 +93,46 @@ namespace ProtoCasual.Core.Bootstrap
             {
                 var storeService = new StoreService(itemDatabase, currencyService, inventoryService);
                 ServiceLocator.Register<IStoreService>(storeService);
+            }
+
+            // HapticService
+            var hapticService = new HapticService(hapticConfig);
+            ServiceLocator.Register<IHapticService>(hapticService);
+
+            // AnalyticsService (default = console logger; replace with your own)
+            var analyticsService = new DebugAnalyticsService(analyticsConfig);
+            ServiceLocator.Register<IAnalyticsService>(analyticsService);
+
+            // RewardService
+            var rewardService = new RewardService(currencyService, inventoryService, rewardConfigs);
+            ServiceLocator.Register<IRewardService>(rewardService);
+
+            // DailyRewardService
+            if (dailyRewardConfig != null)
+            {
+                var dailyRewardService = new DailyRewardService(dailyRewardConfig, dataProvider, rewardService);
+                ServiceLocator.Register<IDailyRewardService>(dailyRewardService);
+            }
+
+            // TutorialService
+            if (tutorialConfig != null)
+            {
+                var tutorialService = new TutorialService(tutorialConfig, dataProvider, analyticsService);
+                ServiceLocator.Register<ITutorialService>(tutorialService);
+            }
+
+            // LeaderboardService
+            if (leaderboardConfig != null)
+            {
+                var leaderboardService = new LocalLeaderboardService(leaderboardConfig, dataProvider);
+                ServiceLocator.Register<ILeaderboardService>(leaderboardService);
+            }
+
+            // AchievementService
+            if (achievementConfig != null)
+            {
+                var achievementService = new AchievementService(achievementConfig, dataProvider, rewardService);
+                ServiceLocator.Register<IAchievementService>(achievementService);
             }
         }
 
