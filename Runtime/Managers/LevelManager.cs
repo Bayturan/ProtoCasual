@@ -1,4 +1,5 @@
 using UnityEngine;
+using ProtoCasual.Core.Bootstrap;
 using ProtoCasual.Core.Interfaces;
 using ProtoCasual.Core.ScriptableObjects;
 using ProtoCasual.Core.Utilities;
@@ -7,6 +8,8 @@ namespace ProtoCasual.Core.Managers
 {
     public class LevelManager : Singleton<LevelManager>, IManager
     {
+        private const string LEVEL_KEY = "CurrentLevel";
+
         [SerializeField] private LevelConfig[] levels;
         private GameObject currentLevel;
         private int currentLevelIndex;
@@ -16,7 +19,8 @@ namespace ProtoCasual.Core.Managers
 
         public void Init()
         {
-            currentLevelIndex = SaveManager.CurrentLevel;
+            var save = ServiceLocator.Get<ISaveService>();
+            currentLevelIndex = save != null ? save.Load(LEVEL_KEY, 0) : 0;
             LoadLevel(currentLevelIndex);
         }
 
@@ -44,8 +48,10 @@ namespace ProtoCasual.Core.Managers
 
         public void NextLevel()
         {
-            SaveManager.NextLevel();
-            LoadLevel(SaveManager.CurrentLevel);
+            currentLevelIndex++;
+            var save = ServiceLocator.Get<ISaveService>();
+            save?.Save(LEVEL_KEY, currentLevelIndex);
+            LoadLevel(currentLevelIndex);
         }
     }
 }

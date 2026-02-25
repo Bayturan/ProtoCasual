@@ -16,23 +16,23 @@ namespace ProtoCasual.Core.Mechanics
         private IInputService inputService;
         private float currentSpeed;
 
-        protected override void OnInitialize()
+        protected override void OnMechanicInitialize()
         {
             inputService = ServiceLocator.Get<IInputService>();
             currentSpeed = 0f;
         }
 
-        protected override void OnEnable()
+        protected override void OnMechanicEnable()
         {
             currentSpeed = 0f;
         }
 
-        protected override void OnDisable()
+        protected override void OnMechanicDisable()
         {
             currentSpeed = 0f;
         }
 
-        protected override void OnUpdate(float deltaTime)
+        protected override void OnMechanicUpdate(float deltaTime)
         {
             if (targetTransform == null || inputService == null) return;
 
@@ -54,7 +54,7 @@ namespace ProtoCasual.Core.Mechanics
             }
         }
 
-        protected override void OnCleanup()
+        protected override void OnMechanicCleanup()
         {
             currentSpeed = 0f;
         }

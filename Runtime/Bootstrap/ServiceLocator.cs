@@ -39,6 +39,21 @@ namespace ProtoCasual.Core.Bootstrap
             return null;
         }
 
+        /// <summary>
+        /// Non-throwing version of Get. Returns true if a service of type T is registered.
+        /// </summary>
+        public static bool TryGet<T>(out T service) where T : class
+        {
+            var type = typeof(T);
+            if (services.TryGetValue(type, out var obj))
+            {
+                service = obj as T;
+                return service != null;
+            }
+            service = null;
+            return false;
+        }
+
         public static bool IsRegistered<T>() where T : class
         {
             return services.ContainsKey(typeof(T));

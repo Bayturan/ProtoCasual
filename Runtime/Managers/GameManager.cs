@@ -50,7 +50,7 @@ namespace ProtoCasual.Core.Managers
             CurrentState = newState;
 
             HandleStateExit(previousState);
-            HandleStateEnter(newState);
+            HandleStateEnter(newState, previousState);
             OnStateChanged?.Invoke(previousState, newState);
 
             isTransitioning = false;
@@ -69,15 +69,24 @@ namespace ProtoCasual.Core.Managers
             }
         }
 
-        private void HandleStateEnter(GameState state)
+        private void HandleStateEnter(GameState state, GameState previousState)
         {
             switch (state)
             {
                 case GameState.Playing:
-                    gameTime = CurrentState == GameState.Paused ? gameTime : 0f;
+                    bool isResuming = previousState == GameState.Paused;
+                    if (!isResuming) gameTime = 0f;
                     isGameRunning = true;
-                    currentGameMode?.OnGameStart();
-                    onGameStart?.Raise();
+                    if (isResuming)
+                    {
+                        currentGameMode?.OnGameResume();
+                        onGameResume?.Raise();
+                    }
+                    else
+                    {
+                        currentGameMode?.OnGameStart();
+                        onGameStart?.Raise();
+                    }
                     break;
                 case GameState.Paused:
                     Time.timeScale = 0f;

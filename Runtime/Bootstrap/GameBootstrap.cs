@@ -88,6 +88,10 @@ namespace ProtoCasual.Core.Bootstrap
             var inventoryService = new InventoryService(dataProvider);
             ServiceLocator.Register<IInventoryService>(inventoryService);
 
+            // EquipmentService
+            var equipmentService = new EquipmentService(dataProvider, inventoryService);
+            ServiceLocator.Register<IEquipmentService>(equipmentService);
+
             // StoreService
             if (itemDatabase != null)
             {

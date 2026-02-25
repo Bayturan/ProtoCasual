@@ -3,6 +3,12 @@ using ProtoCasual.Core.Interfaces;
 
 namespace ProtoCasual.Core.Systems
 {
+    /// <summary>
+    /// Base class for plug-in mechanics. Subclass and override the
+    /// On* callbacks. Use Enable()/Disable() instead of
+    /// gameObject.SetActive — the methods deliberately avoid shadowing
+    /// MonoBehaviour.OnEnable/OnDisable.
+    /// </summary>
     public abstract class MechanicBase : MonoBehaviour, IMechanic
     {
         public abstract string MechanicName { get; }
@@ -13,7 +19,7 @@ namespace ProtoCasual.Core.Systems
         public virtual void Initialize()
         {
             if (isInitialized) return;
-            OnInitialize();
+            OnMechanicInitialize();
             isInitialized = true;
         }
 
@@ -24,32 +30,32 @@ namespace ProtoCasual.Core.Systems
                 Initialize();
             }
             IsEnabled = true;
-            OnEnable();
+            OnMechanicEnable();
         }
 
         public virtual void Disable()
         {
             IsEnabled = false;
-            OnDisable();
+            OnMechanicDisable();
         }
 
         public virtual void UpdateMechanic(float deltaTime)
         {
             if (!IsEnabled) return;
-            OnUpdate(deltaTime);
+            OnMechanicUpdate(deltaTime);
         }
 
         public virtual void Cleanup()
         {
-            OnCleanup();
+            OnMechanicCleanup();
             isInitialized = false;
             IsEnabled = false;
         }
 
-        protected abstract void OnInitialize();
-        protected abstract void OnEnable();
-        protected abstract void OnDisable();
-        protected abstract void OnUpdate(float deltaTime);
-        protected abstract void OnCleanup();
+        protected abstract void OnMechanicInitialize();
+        protected abstract void OnMechanicEnable();
+        protected abstract void OnMechanicDisable();
+        protected abstract void OnMechanicUpdate(float deltaTime);
+        protected abstract void OnMechanicCleanup();
     }
 }

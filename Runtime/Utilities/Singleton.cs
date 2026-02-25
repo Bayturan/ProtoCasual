@@ -6,22 +6,18 @@ namespace ProtoCasual.Core.Utilities
     {
         private static T instance;
         private static readonly object lockObject = new object();
-        private static bool applicationIsQuitting = false;
 
         public static T Instance
         {
             get
             {
-                if (applicationIsQuitting)
-                {
-                    return null;
-                }
+                if (!Application.isPlaying) return null;
 
                 lock (lockObject)
                 {
                     if (instance == null)
                     {
-                        instance = FindObjectOfType<T>();
+                        instance = FindAnyObjectByType<T>();
 
                         if (instance == null)
                         {
@@ -36,6 +32,9 @@ namespace ProtoCasual.Core.Utilities
                 }
             }
         }
+
+        /// <summary>Returns true if an instance exists without triggering lazy creation.</summary>
+        public static bool HasInstance => instance != null;
 
         protected virtual void Awake()
         {
@@ -54,7 +53,7 @@ namespace ProtoCasual.Core.Utilities
         {
             if (instance == this)
             {
-                applicationIsQuitting = true;
+                instance = null;
             }
         }
     }

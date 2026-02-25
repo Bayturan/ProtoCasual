@@ -15,7 +15,7 @@ namespace ProtoCasual.Core.Mechanics
         private IInputService inputService;
         private Vector3 startPosition;
 
-        protected override void OnInitialize()
+        protected override void OnMechanicInitialize()
         {
             inputService = ServiceLocator.Get<IInputService>();
             
@@ -25,7 +25,7 @@ namespace ProtoCasual.Core.Mechanics
             }
         }
 
-        protected override void OnEnable()
+        protected override void OnMechanicEnable()
         {
             if (inputService != null)
             {
@@ -33,7 +33,7 @@ namespace ProtoCasual.Core.Mechanics
             }
         }
 
-        protected override void OnDisable()
+        protected override void OnMechanicDisable()
         {
             if (inputService != null)
             {
@@ -41,7 +41,7 @@ namespace ProtoCasual.Core.Mechanics
             }
         }
 
-        protected override void OnUpdate(float deltaTime)
+        protected override void OnMechanicUpdate(float deltaTime)
         {
             if (targetTransform == null) return;
 
@@ -63,7 +63,7 @@ namespace ProtoCasual.Core.Mechanics
             targetTransform.position = newPos;
         }
 
-        protected override void OnCleanup()
+        protected override void OnMechanicCleanup()
         {
             if (targetTransform != null)
             {
