@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using System.Collections;
 
 namespace ProtoCasual.Core.Utilities
 {
