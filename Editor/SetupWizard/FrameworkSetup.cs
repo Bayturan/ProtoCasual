@@ -82,7 +82,7 @@ namespace ProtoCasual.Editor
         private void DrawPageIndicator()
         {
             EditorGUILayout.Space(4);
-            EditorGUILayout.BeginHorizontal();
+            GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
             string[] labels = { "1. Core", "2. Features", "3. Generate" };
             for (int i = 0; i < TotalPages; i++)
@@ -96,7 +96,7 @@ namespace ProtoCasual.Editor
                     currentPage = i;
             }
             GUILayout.FlexibleSpace();
-            EditorGUILayout.EndHorizontal();
+            GUILayout.EndHorizontal();
             EditorGUILayout.Space(4);
         }
 
@@ -273,7 +273,7 @@ namespace ProtoCasual.Editor
 
         private void DrawNavigation()
         {
-            EditorGUILayout.BeginHorizontal();
+            GUILayout.BeginHorizontal();
 
             GUI.enabled = currentPage > 0;
             if (GUILayout.Button("← Back", GUILayout.Height(30)))
@@ -292,7 +292,7 @@ namespace ProtoCasual.Editor
                 currentPage++;
 
             GUI.enabled = true;
-            EditorGUILayout.EndHorizontal();
+            GUILayout.EndHorizontal();
         }
 
         // ─── Execute ───────────────────────────────────────────────────

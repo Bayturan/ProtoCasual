@@ -106,7 +106,7 @@ namespace ProtoCasual.Editor
             }
         }
 
-        private void DrawHeader()
+        private new void DrawHeader()
         {
             EditorGUILayout.Space(4);
             var style = new GUIStyle(EditorStyles.boldLabel) { fontSize = 14 };

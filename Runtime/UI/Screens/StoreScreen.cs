@@ -50,9 +50,10 @@ namespace ProtoCasual.Core.UI
 
         protected override void OnInitialize()
         {
-            storeService    = ServiceLocator.Get<IStoreService>();
-            currencyService = ServiceLocator.Get<ICurrencyService>();
-            inventoryService = ServiceLocator.Get<IInventoryService>();
+            // Try to get services; store features will be disabled if services aren't available
+            ServiceLocator.TryGet<IStoreService>(out storeService);
+            ServiceLocator.TryGet<ICurrencyService>(out currencyService);
+            ServiceLocator.TryGet<IInventoryService>(out inventoryService);
 
             if (closeButton != null)
                 closeButton.onClick.AddListener(OnCloseClicked);
