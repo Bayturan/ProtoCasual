@@ -19,40 +19,49 @@ namespace ProtoCasual.Core.UI
         protected override void OnInitialize()
         {
             if (retryButton != null)
-            {
                 retryButton.onClick.AddListener(OnRetryClicked);
-            }
 
             if (menuButton != null)
-            {
                 menuButton.onClick.AddListener(OnMenuClicked);
-            }
 
             if (watchAdButton != null)
-            {
                 watchAdButton.onClick.AddListener(OnWatchAdClicked);
+        }
+
+        protected override void OnShow()
+        {
+            // Play fail audio
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlayLevelFail();
+                AudioManager.Instance.PlayLoseMusic();
             }
         }
 
         private void OnRetryClicked()
         {
-            GameManager.Instance.Restart();
+            AudioManager.Instance?.PlayButtonClick();
+            GameManager.Instance?.Restart();
         }
 
         private void OnMenuClicked()
         {
-            GameManager.Instance.ReturnToMenu();
+            AudioManager.Instance?.PlayButtonClick();
+            GameManager.Instance?.ReturnToMenu();
         }
 
         private void OnWatchAdClicked()
         {
-            var adsService = ServiceLocator.Get<IAdsService>();
+            AudioManager.Instance?.PlayButtonClick();
+            var adsService = ServiceLocator.IsRegistered<IAdsService>()
+                ? ServiceLocator.Get<IAdsService>()
+                : null;
             adsService?.ShowRewarded((success) =>
             {
                 if (success)
                 {
                     Hide();
-                    GameManager.Instance.Resume();
+                    GameManager.Instance?.Resume();
                 }
             });
         }

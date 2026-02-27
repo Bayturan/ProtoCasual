@@ -8,25 +8,59 @@ using ProtoCasual.Core.Utilities;
 namespace ProtoCasual.Core.Managers
 {
     /// <summary>
-    /// Central game state machine. Controls state transitions and notifies listeners via events.
-    /// Uses Singleton<T> to avoid manual boilerplate.
+    /// Central game state machine. Controls state transitions, score tracking,
+    /// and notifies listeners via GameEvent ScriptableObjects and C# events.
+    /// Events are wired automatically by GameBootstrap from FrameworkConfig.
     /// </summary>
     public class GameManager : Singleton<GameManager>
     {
-        [Header("Events")]
-        [SerializeField] private GameEvent onGameStart;
-        [SerializeField] private GameEvent onGamePause;
-        [SerializeField] private GameEvent onGameResume;
-        [SerializeField] private GameEvent onGameComplete;
-        [SerializeField] private GameEvent onGameFail;
+        // ─── Events (wired by GameBootstrap) ────────────────────────────
+
+        private GameEvent onGameStart;
+        private GameEvent onGamePause;
+        private GameEvent onGameResume;
+        private GameEvent onGameComplete;
+        private GameEvent onGameFail;
+
+        // ─── State ──────────────────────────────────────────────────────
 
         public GameState CurrentState { get; private set; } = GameState.Boot;
         public event Action<GameState, GameState> OnStateChanged;
+
+        // ─── Score ──────────────────────────────────────────────────────
+
+        public int CurrentScore { get; private set; }
+        public event Action<int> OnScoreChanged;
+
+        // ─── Properties ─────────────────────────────────────────────────
+
+        public float GameTime => gameTime;
+        public bool IsGameRunning => isGameRunning;
+        public IGameMode CurrentGameMode => currentGameMode;
 
         private IGameMode currentGameMode;
         private float gameTime;
         private bool isGameRunning;
         private bool isTransitioning;
+
+        // ─── Framework Event Wiring ─────────────────────────────────────
+
+        /// <summary>
+        /// Called by GameBootstrap to wire GameEvent SOs from FrameworkConfig.
+        /// No manual assignment needed.
+        /// </summary>
+        public void SetFrameworkEvents(
+            GameEvent start, GameEvent pause, GameEvent resume,
+            GameEvent complete, GameEvent fail)
+        {
+            onGameStart = start;
+            onGamePause = pause;
+            onGameResume = resume;
+            onGameComplete = complete;
+            onGameFail = fail;
+        }
+
+        // ─── Update ─────────────────────────────────────────────────────
 
         private void Update()
         {
@@ -36,6 +70,8 @@ namespace ProtoCasual.Core.Managers
                 currentGameMode?.UpdateMode(Time.deltaTime);
             }
         }
+
+        // ─── State Machine ──────────────────────────────────────────────
 
         /// <summary>
         /// Main state transition method. All state changes flow through here.
@@ -75,7 +111,11 @@ namespace ProtoCasual.Core.Managers
             {
                 case GameState.Playing:
                     bool isResuming = previousState == GameState.Paused;
-                    if (!isResuming) gameTime = 0f;
+                    if (!isResuming)
+                    {
+                        gameTime = 0f;
+                        CurrentScore = 0;
+                    }
                     isGameRunning = true;
                     if (isResuming)
                     {
@@ -104,6 +144,8 @@ namespace ProtoCasual.Core.Managers
             }
         }
 
+        // ─── Game Mode ──────────────────────────────────────────────────
+
         public void SetGameMode(IGameMode gameMode)
         {
             currentGameMode?.Cleanup();
@@ -111,11 +153,29 @@ namespace ProtoCasual.Core.Managers
             currentGameMode?.Initialize();
         }
 
+        // ─── Score Methods ──────────────────────────────────────────────
+
+        public void AddScore(int points)
+        {
+            CurrentScore += points;
+            OnScoreChanged?.Invoke(CurrentScore);
+        }
+
+        public void SetScore(int score)
+        {
+            CurrentScore = score;
+            OnScoreChanged?.Invoke(CurrentScore);
+        }
+
+        // ─── Convenience Commands ───────────────────────────────────────
+
         public void Play() => ChangeState(GameState.Playing);
         public void Pause() => ChangeState(GameState.Paused);
         public void Resume() => ChangeState(GameState.Playing);
         public void Complete() => ChangeState(GameState.Completed);
         public void Fail() => ChangeState(GameState.Failed);
+        public void GoToMenu() => ChangeState(GameState.Menu);
+        public void GoToPrepare() => ChangeState(GameState.Prepare);
 
         public void Restart()
         {
@@ -132,7 +192,12 @@ namespace ProtoCasual.Core.Managers
             ChangeState(GameState.Menu);
         }
 
+        // ─── Legacy API (backwards compatible) ──────────────────────────
+
+        [Obsolete("Use GameTime property instead")]
         public float GetGameTime() => gameTime;
+
+        [Obsolete("Use CurrentGameMode property instead")]
         public IGameMode GetCurrentGameMode() => currentGameMode;
     }
 }

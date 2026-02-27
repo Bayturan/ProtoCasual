@@ -28,10 +28,14 @@ namespace ProtoCasual.Core.UI
         protected override void Awake()
         {
             base.Awake();
-            RegisterScreens();
+            CollectScreens();
         }
 
-        private void RegisterScreens()
+        /// <summary>
+        /// Discovers all screens and registers them by name. Does NOT Initialize screens
+        /// — that happens in <see cref="Initialize"/> after services are registered.
+        /// </summary>
+        private void CollectScreens()
         {
             if (screens == null || screens.Length == 0)
                 screens = GetComponentsInChildren<UIScreen>(true);
@@ -42,19 +46,27 @@ namespace ProtoCasual.Core.UI
                 if (screen != null && !screenDictionary.ContainsKey(screen.ScreenName))
                 {
                     screenDictionary.Add(screen.ScreenName, screen);
-                    screen.Initialize();
                     screen.Hide();
                 }
             }
         }
 
         /// <summary>
-        /// Call after GameManager is ready. Subscribes to state changes and shows menu.
+        /// Call after GameBootstrap has registered all services.
+        /// Initializes every screen, subscribes to state changes, and shows the menu.
         /// </summary>
         public void Initialize()
         {
+            // Initialize screens now that ServiceLocator is ready
+            foreach (var screen in screens)
+            {
+                if (screen != null)
+                    screen.Initialize();
+            }
+
             if (GameManager.Instance != null)
                 GameManager.Instance.OnStateChanged += HandleStateChange;
+
             ShowScreen(menuScreenName);
         }
 

@@ -11,52 +11,51 @@ using ProtoCasual.Core.Analytics;
 using ProtoCasual.Core.Tutorial;
 using ProtoCasual.Core.Leaderboard;
 using ProtoCasual.Core.Achievements;
+using ProtoCasual.Core.Managers;
 
 namespace ProtoCasual.Core.Bootstrap
 {
     /// <summary>
-    /// Entry point for the game. Initializes ServiceLocator, registers services, and bootstraps managers.
+    /// Entry point for the game. Only requires a single FrameworkConfig reference.
+    /// All sub-configs, events, and services are auto-wired from the master config.
     /// Place this on the first GameObject in your scene hierarchy.
     /// </summary>
     public class GameBootstrap : MonoBehaviour
     {
-        [Header("Core")]
-        [SerializeField] private GameConfig gameConfig;
-        [SerializeField] private ItemDatabase itemDatabase;
-
-        [Header("Haptics")]
-        [SerializeField] private HapticConfig hapticConfig;
-
-        [Header("Economy")]
-        [SerializeField] private RewardConfig[] rewardConfigs;
-        [SerializeField] private DailyRewardConfig dailyRewardConfig;
-
-        [Header("Analytics")]
-        [SerializeField] private AnalyticsConfig analyticsConfig;
-
-        [Header("Tutorial")]
-        [SerializeField] private TutorialConfig tutorialConfig;
-
-        [Header("Social")]
-        [SerializeField] private LeaderboardConfig leaderboardConfig;
-        [SerializeField] private AchievementConfig achievementConfig;
+        [Header("Master Config (only thing you need to assign)")]
+        [SerializeField] private FrameworkConfig frameworkConfig;
 
         private void Awake()
         {
             ServiceLocator.Initialize();
-            Application.targetFrameRate = gameConfig != null ? gameConfig.targetFPS : 60;
+
+            // Register FrameworkConfig itself so any system can access it
+            if (frameworkConfig != null)
+                ServiceLocator.Register(frameworkConfig);
+
+            // Apply core game settings
+            var gc = frameworkConfig != null ? frameworkConfig.gameConfig : null;
+            Application.targetFrameRate = gc != null ? gc.targetFPS : 60;
+
+            if (gc != null)
+            {
+                Screen.sleepTimeout = gc.neverSleep ? SleepTimeout.NeverSleep : SleepTimeout.SystemSetting;
+                Time.timeScale = gc.defaultTimeScale;
+            }
         }
 
         private void Start()
         {
-            RegisterServices();
+            RegisterCoreServices();
+            RegisterEconomyServices();
+            RegisterOptionalServices();
             InitializeManagers();
+            WireGameEvents();
         }
 
-        /// <summary>
-        /// Override or extend this to register your own services with the ServiceLocator.
-        /// </summary>
-        protected virtual void RegisterServices()
+        // ─── Core Services ──────────────────────────────────────────────
+
+        private void RegisterCoreServices()
         {
             // InputService
             var inputService = FindAnyObjectByType<Systems.InputManager>();
@@ -64,21 +63,22 @@ namespace ProtoCasual.Core.Bootstrap
                 ServiceLocator.Register<IInputService>(inputService);
 
             // SaveService
-            var saveService = FindAnyObjectByType<Managers.SaveService>();
+            var saveService = FindAnyObjectByType<SaveService>();
             if (saveService != null)
                 ServiceLocator.Register<ISaveService>(saveService);
 
-            // PlayerDataProvider  (loads PlayerData from save)
+            // PlayerDataProvider
             var save = ServiceLocator.Get<ISaveService>();
             var dataProvider = new PlayerDataProvider(save);
             ServiceLocator.Register(dataProvider);
+        }
 
-            // ItemDatabase
-            if (itemDatabase != null)
-            {
-                itemDatabase.Initialise();
-                ServiceLocator.Register(itemDatabase);
-            }
+        // ─── Economy & Store Services ───────────────────────────────────
+
+        private void RegisterEconomyServices()
+        {
+            var dataProvider = ServiceLocator.Get<PlayerDataProvider>();
+            var save = ServiceLocator.Get<ISaveService>();
 
             // CurrencyService
             var currencyService = new CurrencyService(dataProvider, save);
@@ -92,58 +92,123 @@ namespace ProtoCasual.Core.Bootstrap
             var equipmentService = new EquipmentService(dataProvider, inventoryService);
             ServiceLocator.Register<IEquipmentService>(equipmentService);
 
-            // StoreService
-            if (itemDatabase != null)
+            // Apply starting currency on first launch
+            if (frameworkConfig != null && frameworkConfig.economyConfig != null)
             {
-                var storeService = new StoreService(itemDatabase, currencyService, inventoryService);
+                var eco = frameworkConfig.economyConfig;
+                if (!PlayerPrefs.HasKey("ProtoCasual_EconomyInitialized"))
+                {
+                    currencyService.AddSoft(eco.startingSoftCurrency);
+                    currencyService.AddHard(eco.startingHardCurrency);
+                    PlayerPrefs.SetInt("ProtoCasual_EconomyInitialized", 1);
+                    PlayerPrefs.Save();
+                    Debug.Log($"[GameBootstrap] Starting currency applied: {eco.startingSoftCurrency} soft, {eco.startingHardCurrency} hard.");
+                }
+            }
+
+            // Store
+            if (frameworkConfig != null && frameworkConfig.enableStore && frameworkConfig.itemDatabase != null)
+            {
+                var itemDb = frameworkConfig.itemDatabase;
+                itemDb.Initialise();
+                ServiceLocator.Register(itemDb);
+
+                var storeService = new StoreService(itemDb, currencyService, inventoryService);
                 ServiceLocator.Register<IStoreService>(storeService);
             }
 
-            // HapticService
-            var hapticService = new HapticService(hapticConfig);
-            ServiceLocator.Register<IHapticService>(hapticService);
-
-            // AnalyticsService (default = console logger; replace with your own)
-            var analyticsService = new DebugAnalyticsService(analyticsConfig);
-            ServiceLocator.Register<IAnalyticsService>(analyticsService);
-
             // RewardService
-            var rewardService = new RewardService(currencyService, inventoryService, rewardConfigs);
+            var rewardService = new RewardService(
+                currencyService, inventoryService,
+                frameworkConfig != null ? frameworkConfig.rewardConfigs : null);
             ServiceLocator.Register<IRewardService>(rewardService);
+        }
 
-            // DailyRewardService
-            if (dailyRewardConfig != null)
+        // ─── Optional Feature Services ──────────────────────────────────
+
+        private void RegisterOptionalServices()
+        {
+            if (frameworkConfig == null) return;
+
+            var dataProvider = ServiceLocator.Get<PlayerDataProvider>();
+
+            // Haptics
+            if (frameworkConfig.enableHaptics)
             {
-                var dailyRewardService = new DailyRewardService(dailyRewardConfig, dataProvider, rewardService);
+                var hapticService = new HapticService(frameworkConfig.hapticConfig);
+                ServiceLocator.Register<IHapticService>(hapticService);
+            }
+
+            // Analytics
+            IAnalyticsService analyticsService = null;
+            if (frameworkConfig.enableAnalytics)
+            {
+                analyticsService = new DebugAnalyticsService(frameworkConfig.analyticsConfig);
+                ServiceLocator.Register<IAnalyticsService>(analyticsService);
+            }
+
+            // Daily Rewards
+            if (frameworkConfig.enableDailyRewards && frameworkConfig.dailyRewardConfig != null)
+            {
+                var rewardService = ServiceLocator.Get<IRewardService>();
+                var dailyRewardService = new DailyRewardService(
+                    frameworkConfig.dailyRewardConfig, dataProvider, rewardService);
                 ServiceLocator.Register<IDailyRewardService>(dailyRewardService);
             }
 
-            // TutorialService
-            if (tutorialConfig != null)
+            // Tutorial
+            if (frameworkConfig.enableTutorial && frameworkConfig.tutorialConfig != null)
             {
-                var tutorialService = new TutorialService(tutorialConfig, dataProvider, analyticsService);
+                var tutorialService = new TutorialService(
+                    frameworkConfig.tutorialConfig, dataProvider, analyticsService);
                 ServiceLocator.Register<ITutorialService>(tutorialService);
             }
 
-            // LeaderboardService
-            if (leaderboardConfig != null)
+            // Leaderboards
+            if (frameworkConfig.enableLeaderboards && frameworkConfig.leaderboardConfig != null)
             {
-                var leaderboardService = new LocalLeaderboardService(leaderboardConfig, dataProvider);
+                var leaderboardService = new LocalLeaderboardService(
+                    frameworkConfig.leaderboardConfig, dataProvider);
                 ServiceLocator.Register<ILeaderboardService>(leaderboardService);
             }
 
-            // AchievementService
-            if (achievementConfig != null)
+            // Achievements
+            if (frameworkConfig.enableAchievements && frameworkConfig.achievementConfig != null)
             {
-                var achievementService = new AchievementService(achievementConfig, dataProvider, rewardService);
+                var rewardService = ServiceLocator.Get<IRewardService>();
+                var achievementService = new AchievementService(
+                    frameworkConfig.achievementConfig, dataProvider, rewardService);
                 ServiceLocator.Register<IAchievementService>(achievementService);
             }
         }
+
+        // ─── Manager Init ───────────────────────────────────────────────
 
         protected virtual void InitializeManagers()
         {
             if (UI.UIManager.Instance != null)
                 UI.UIManager.Instance.Initialize();
+
+            // Apply AudioConfig to AudioManager
+            if (frameworkConfig != null && frameworkConfig.audioConfig != null &&
+                AudioManager.Instance != null)
+            {
+                AudioManager.Instance.ApplyConfig(frameworkConfig.audioConfig);
+            }
+        }
+
+        // ─── Wire GameEvents to GameManager ─────────────────────────────
+
+        private void WireGameEvents()
+        {
+            if (frameworkConfig == null || GameManager.Instance == null) return;
+
+            GameManager.Instance.SetFrameworkEvents(
+                frameworkConfig.onGameStart,
+                frameworkConfig.onGamePause,
+                frameworkConfig.onGameResume,
+                frameworkConfig.onGameComplete,
+                frameworkConfig.onGameFail);
         }
     }
 }

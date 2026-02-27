@@ -32,16 +32,19 @@ namespace ProtoCasual.Core.UI
 
         private void OnResumeClicked()
         {
+            AudioManager.Instance?.PlayButtonClick();
             GameManager.Instance.Resume();
         }
 
         private void OnRestartClicked()
         {
+            AudioManager.Instance?.PlayButtonClick();
             GameManager.Instance.Restart();
         }
 
         private void OnMenuClicked()
         {
+            AudioManager.Instance?.PlayButtonClick();
             GameManager.Instance.ReturnToMenu();
         }
     }

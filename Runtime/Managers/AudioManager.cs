@@ -1,10 +1,13 @@
 using UnityEngine;
+using ProtoCasual.Core.ScriptableObjects;
 using ProtoCasual.Core.Utilities;
 
 namespace ProtoCasual.Core.Managers
 {
     /// <summary>
     /// Manages audio playback for SFX, music, and UI sounds.
+    /// Loads AudioConfig from FrameworkConfig via GameBootstrap.ApplyConfig().
+    /// Provides convenience methods for all pre-configured clips.
     /// </summary>
     public class AudioManager : Singleton<AudioManager>
     {
@@ -19,6 +22,8 @@ namespace ProtoCasual.Core.Managers
 
         public bool IsMusicEnabled { get; private set; } = true;
         public bool IsSfxEnabled { get; private set; } = true;
+
+        private AudioConfig audioConfig;
 
         protected override void Awake()
         {
@@ -44,6 +49,27 @@ namespace ProtoCasual.Core.Managers
                 uiSource.playOnAwake = false;
             }
         }
+
+        // ─── Config ─────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Called by GameBootstrap to apply AudioConfig settings.
+        /// </summary>
+        public void ApplyConfig(AudioConfig config)
+        {
+            audioConfig = config;
+            if (config == null) return;
+
+            defaultMusicVolume = config.musicVolume * config.masterVolume;
+            defaultSfxVolume = config.sfxVolume * config.masterVolume;
+
+            if (musicSource != null)
+                musicSource.volume = defaultMusicVolume;
+            if (uiSource != null)
+                uiSource.volume = config.uiVolume * config.masterVolume;
+        }
+
+        // ─── Core Playback ──────────────────────────────────────────────
 
         public void PlayMusic(AudioClip clip)
         {
@@ -71,6 +97,74 @@ namespace ProtoCasual.Core.Managers
             if (!IsSfxEnabled || clip == null || uiSource == null) return;
             uiSource.PlayOneShot(clip);
         }
+
+        // ─── Convenience: Music ─────────────────────────────────────────
+
+        public void PlayMenuMusic()
+        {
+            if (audioConfig != null) PlayMusic(audioConfig.menuMusic);
+        }
+
+        public void PlayGameplayMusic()
+        {
+            if (audioConfig != null) PlayMusic(audioConfig.gameplayMusic);
+        }
+
+        public void PlayWinMusic()
+        {
+            if (audioConfig != null) PlayMusic(audioConfig.winMusic);
+        }
+
+        public void PlayLoseMusic()
+        {
+            if (audioConfig != null) PlayMusic(audioConfig.loseMusic);
+        }
+
+        // ─── Convenience: Game SFX ──────────────────────────────────────
+
+        public void PlayScorePoint()
+        {
+            if (audioConfig != null) PlaySFX(audioConfig.scorePoint);
+        }
+
+        public void PlayCollectItem()
+        {
+            if (audioConfig != null) PlaySFX(audioConfig.collectItem);
+        }
+
+        public void PlayLevelComplete()
+        {
+            if (audioConfig != null) PlaySFX(audioConfig.levelComplete);
+        }
+
+        public void PlayLevelFail()
+        {
+            if (audioConfig != null) PlaySFX(audioConfig.levelFail);
+        }
+
+        public void PlayCountdown()
+        {
+            if (audioConfig != null) PlaySFX(audioConfig.countdown);
+        }
+
+        // ─── Convenience: UI SFX ────────────────────────────────────────
+
+        public void PlayButtonClick()
+        {
+            if (audioConfig != null) PlayUI(audioConfig.buttonClick);
+        }
+
+        public void PlayPopupOpen()
+        {
+            if (audioConfig != null) PlayUI(audioConfig.popupOpen);
+        }
+
+        public void PlayPopupClose()
+        {
+            if (audioConfig != null) PlayUI(audioConfig.popupClose);
+        }
+
+        // ─── Settings ───────────────────────────────────────────────────
 
         public void SetMusicEnabled(bool enabled)
         {

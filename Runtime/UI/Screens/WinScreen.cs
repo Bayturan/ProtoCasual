@@ -18,52 +18,56 @@ namespace ProtoCasual.Core.UI
         protected override void OnInitialize()
         {
             if (nextButton != null)
-            {
                 nextButton.onClick.AddListener(OnNextClicked);
-            }
 
             if (restartButton != null)
-            {
                 restartButton.onClick.AddListener(OnRestartClicked);
-            }
 
             if (menuButton != null)
-            {
                 menuButton.onClick.AddListener(OnMenuClicked);
-            }
         }
 
         protected override void OnShow()
         {
-            float finalTime = GameManager.Instance.GetGameTime();
-            
-            if (timeText != null)
+            // Display final score & time
+            var gm = GameManager.Instance;
+            if (gm != null)
             {
-                timeText.text = $"Time: {finalTime:F2}s";
-            }
-        }
+                if (scoreText != null)
+                    scoreText.text = $"Score: {gm.CurrentScore}";
 
-        public void SetFinalScore(float score)
-        {
-            if (scoreText != null)
-            {
-                scoreText.text = $"Score: {score:F0}";
+                if (timeText != null)
+                    timeText.text = $"Time: {gm.GameTime:F2}s";
             }
+
+            // Play win audio
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlayLevelComplete();
+                AudioManager.Instance.PlayWinMusic();
+            }
+
+            // Advance to next level
+            if (LevelManager.Instance != null)
+                LevelManager.Instance.NextLevel();
         }
 
         private void OnNextClicked()
         {
-            GameManager.Instance.Restart();
+            AudioManager.Instance?.PlayButtonClick();
+            GameManager.Instance?.Restart();
         }
 
         private void OnRestartClicked()
         {
-            GameManager.Instance.Restart();
+            AudioManager.Instance?.PlayButtonClick();
+            GameManager.Instance?.Restart();
         }
 
         private void OnMenuClicked()
         {
-            GameManager.Instance.ReturnToMenu();
+            AudioManager.Instance?.PlayButtonClick();
+            GameManager.Instance?.ReturnToMenu();
         }
     }
 }

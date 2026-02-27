@@ -147,6 +147,7 @@ namespace ProtoCasual.Core.UI
 
         private void OnCloseClicked()
         {
+            AudioManager.Instance?.PlayButtonClick();
             UIManager.Instance.ShowScreen(nameof(MenuScreen));
         }
     }

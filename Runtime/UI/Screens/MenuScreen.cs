@@ -28,24 +28,35 @@ namespace ProtoCasual.Core.UI
                 settingsButton.onClick.AddListener(OnSettingsClicked);
         }
 
+        protected override void OnShow()
+        {
+            // Play menu music when entering menu
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.PlayMenuMusic();
+        }
+
         private void OnPlayClicked()
         {
+            AudioManager.Instance?.PlayButtonClick();
             GameManager.Instance.ChangeState(GameState.Prepare);
         }
 
         private void OnStoreClicked()
         {
+            AudioManager.Instance?.PlayButtonClick();
             UIManager.Instance.ShowScreen(nameof(StoreScreen));
         }
 
         private void OnInventoryClicked()
         {
+            AudioManager.Instance?.PlayButtonClick();
             UIManager.Instance.ShowScreen(nameof(InventoryScreen));
         }
 
         private void OnSettingsClicked()
         {
-            UIManager.Instance.ShowScreen("Settings");
+            AudioManager.Instance?.PlayButtonClick();
+            UIManager.Instance.ShowScreen(nameof(SettingsScreen));
         }
     }
 }

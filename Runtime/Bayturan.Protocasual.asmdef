@@ -2,6 +2,7 @@
     "name": "Bayturan.Protocasual",
     "rootNamespace": "ProtoCasual.Core",
     "references": [
+        "Unity.InputSystem",
         "Unity.TextMeshPro"
     ],
     "includePlatforms": [],

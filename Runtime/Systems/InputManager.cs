@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using System;
 using ProtoCasual.Core.Interfaces;
 
@@ -27,6 +28,7 @@ namespace ProtoCasual.Core.Systems
         private bool isHolding;
         private float holdTimer;
         private bool holdTriggered;
+        private bool pointerDown;
 
         private void Update()
         {
@@ -37,18 +39,26 @@ namespace ProtoCasual.Core.Systems
 
         private void HandleInput()
         {
-            // Mouse/Touch input
-            if (Input.GetMouseButtonDown(0))
+            var pointer = Pointer.current;
+            if (pointer == null) return;
+
+            bool pressed = pointer.press.isPressed;
+            bool justPressed = pointer.press.wasPressedThisFrame;
+            bool justReleased = pointer.press.wasReleasedThisFrame;
+            Vector2 position = pointer.position.ReadValue();
+
+            if (justPressed)
             {
-                touchStartPos = Input.mousePosition;
+                pointerDown = true;
+                touchStartPos = position;
                 touchCurrentPos = touchStartPos;
                 holdTimer = 0f;
                 holdTriggered = false;
             }
 
-            if (Input.GetMouseButton(0))
+            if (pressed && pointerDown)
             {
-                touchCurrentPos = Input.mousePosition;
+                touchCurrentPos = position;
                 float distance = Vector2.Distance(touchStartPos, touchCurrentPos);
 
                 // Check for drag
@@ -81,9 +91,10 @@ namespace ProtoCasual.Core.Systems
                 }
             }
 
-            if (Input.GetMouseButtonUp(0))
+            if (justReleased && pointerDown)
             {
-                touchCurrentPos = Input.mousePosition;
+                pointerDown = false;
+                touchCurrentPos = position;
                 float distance = Vector2.Distance(touchStartPos, touchCurrentPos);
 
                 if (isDragging)
@@ -115,7 +126,8 @@ namespace ProtoCasual.Core.Systems
 
         public Vector2 GetInputPosition()
         {
-            return Input.mousePosition;
+            var pointer = Pointer.current;
+            return pointer != null ? pointer.position.ReadValue() : Vector2.zero;
         }
 
         public Vector2 GetDragDelta()
@@ -125,12 +137,22 @@ namespace ProtoCasual.Core.Systems
 
         public float GetHorizontalAxis()
         {
-            return Input.GetAxis("Horizontal");
+            var keyboard = Keyboard.current;
+            if (keyboard == null) return 0f;
+            float val = 0f;
+            if (keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed) val += 1f;
+            if (keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed) val -= 1f;
+            return val;
         }
 
         public float GetVerticalAxis()
         {
-            return Input.GetAxis("Vertical");
+            var keyboard = Keyboard.current;
+            if (keyboard == null) return 0f;
+            float val = 0f;
+            if (keyboard.wKey.isPressed || keyboard.upArrowKey.isPressed) val += 1f;
+            if (keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed) val -= 1f;
+            return val;
         }
     }
 }

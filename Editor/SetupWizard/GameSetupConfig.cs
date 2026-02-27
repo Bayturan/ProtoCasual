@@ -23,8 +23,8 @@ namespace ProtoCasual.Editor
         public GameType gameType = GameType.HyperCasual;
         public MapType mapType = MapType.FixedLevels;
         public BotOption bots = BotOption.None;
-        public MonetizationType monetization = MonetizationType.None;
-        public StoreOption store = StoreOption.Disabled;
+        public MonetizationType monetization = MonetizationType.AdsOnly;
+        public StoreOption store = StoreOption.Enabled;
         public InputType inputType = InputType.Tap;
         public TargetPlatform platform = TargetPlatform.Both;
 
@@ -32,8 +32,8 @@ namespace ProtoCasual.Editor
         public bool enableHaptics = true;
         public bool enableAnalytics = true;
         public bool enableRewards = true;
-        public bool enableDailyRewards;
-        public bool enableTutorial;
+        public bool enableDailyRewards = true;
+        public bool enableTutorial = true;
         public bool enableLeaderboards;
         public bool enableAchievements;
         public bool enablePopups = true;
