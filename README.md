@@ -17,33 +17,40 @@ A production-ready Unity UPM package for building casual mobile games. Genre-agn
 4. [Bootstrap & ServiceLocator](#bootstrap--servicelocator)
 5. [Game State Machine](#game-state-machine)
 6. [Game Modes](#game-modes)
-7. [UI System](#ui-system)
-8. [Input System](#input-system)
-9. [Currency System](#currency-system)
-10. [Inventory System](#inventory-system)
-11. [Store System](#store-system)
-12. [Save System](#save-system)
-13. [Audio Manager](#audio-manager)
-14. [Level Manager](#level-manager)
-15. [Event System](#event-system)
-16. [Mechanics System](#mechanics-system)
-17. [Map & Endless Generation](#map--endless-generation)
-18. [Object Pool](#object-pool)
-19. [Timer](#timer)
-20. [Extension Methods](#extension-methods)
-21. [Haptic Service](#haptic-service)
-22. [Popup System](#popup-system)
-23. [Reward Service](#reward-service)
-24. [Daily Reward Service](#daily-reward-service)
-25. [Analytics Service](#analytics-service)
-26. [Tutorial System](#tutorial-system)
-27. [Leaderboard Service](#leaderboard-service)
-28. [Achievement Service](#achievement-service)
-29. [Ads & IAP Interfaces](#ads--iap-interfaces)
-30. [Bot System](#bot-system)
-31. [ScriptableObject Configs](#scriptableobject-configs)
-32. [Folder Structure](#folder-structure)
-33. [Samples](#samples)
+7. [Game Type Guides](#game-type-guides)
+   - [HyperCasual](#hypercasual)
+   - [Endless Runner](#endless-runner)
+   - [Puzzle](#puzzle)
+   - [Racing](#racing)
+   - [Hybrid](#hybrid)
+8. [UI System](#ui-system)
+9. [Input System](#input-system)
+10. [Currency System](#currency-system)
+11. [Inventory System](#inventory-system)
+12. [Equipment System](#equipment-system)
+13. [Store System](#store-system)
+14. [Save System](#save-system)
+15. [Audio Manager](#audio-manager)
+16. [Level Manager](#level-manager)
+17. [Event System](#event-system)
+18. [Mechanics System](#mechanics-system)
+19. [Map & Endless Generation](#map--endless-generation)
+20. [Object Pool](#object-pool)
+21. [Timer](#timer)
+22. [Extension Methods](#extension-methods)
+23. [Haptic Service](#haptic-service)
+24. [Popup System](#popup-system)
+25. [Reward Service](#reward-service)
+26. [Daily Reward Service](#daily-reward-service)
+27. [Analytics Service](#analytics-service)
+28. [Tutorial System](#tutorial-system)
+29. [Leaderboard Service](#leaderboard-service)
+30. [Achievement Service](#achievement-service)
+31. [Ads & IAP Interfaces](#ads--iap-interfaces)
+32. [Bot System](#bot-system)
+33. [ScriptableObject Configs](#scriptableobject-configs)
+34. [Folder Structure](#folder-structure)
+35. [Samples](#samples)
 
 ---
 
@@ -117,11 +124,11 @@ Runtime/
 ├── Bootstrap/          GameBootstrap, ServiceLocator
 ├── Currency/           CurrencyService
 ├── Data/               PlayerData, PlayerDataProvider
-├── Events/             GameEvent, GameEventListener, GameEventBool, GameEventInt
+├── Events/             GameEvent, GameEvent<T>, GameEventListener, GameEventBool, GameEventInt, GameEventFloat, GameEventString
 ├── GameLoop/           GameModeBase, GameState
 ├── Haptics/            HapticService
-├── Interfaces/         24 interfaces
-├── Inventory/          InventoryService
+├── Interfaces/         25 interfaces (incl. IEquipmentService)
+├── Inventory/          InventoryService, EquipmentService
 ├── Leaderboard/        LocalLeaderboardService
 ├── Managers/           GameManager, AudioManager, GameModeManager, LevelManager, SaveManager, SaveService
 ├── Rewards/            RewardService, DailyRewardService
@@ -135,7 +142,7 @@ Runtime/
 
 **Key patterns:**
 - **ServiceLocator** — All services registered and resolved through a central registry
-- **Singleton\<T\>** — Thread-safe generic MonoBehaviour singleton with DontDestroyOnLoad
+- **Singleton\<T\>** — Thread-safe generic MonoBehaviour singleton with DontDestroyOnLoad. Use `Singleton<T>.HasInstance` to check without triggering lazy creation.
 - **State Machine** — `GameManager` drives game flow through `GameState` enum
 - **ScriptableObject Events** — Decoupled event channels
 - **Interface-driven** — Every system has a contract; implementations are swappable
@@ -164,6 +171,12 @@ ServiceLocator.Register<IMyService>(myServiceInstance);
 // Resolve a service
 var service = ServiceLocator.Get<IMyService>();
 
+// Safe resolve (non-throwing)
+if (ServiceLocator.TryGet<IMyService>(out var myService))
+{
+    myService.DoSomething();
+}
+
 // Check if registered
 if (ServiceLocator.IsRegistered<IMyService>()) { }
 
@@ -188,6 +201,7 @@ ServiceLocator.Unregister<IMyService>();
 | TutorialService | `ITutorialService` | Plain C# | TutorialConfig |
 | LocalLeaderboardService | `ILeaderboardService` | Plain C# | LeaderboardConfig |
 | AchievementService | `IAchievementService` | Plain C# | AchievementConfig |
+| EquipmentService | `IEquipmentService` | Plain C# | — |
 
 ### Custom Bootstrap
 
@@ -349,6 +363,881 @@ GameModeManager.Instance.SetGameModeByIndex(0);
 // Get names of all available modes
 string[] modes = GameModeManager.Instance.GetAvailableGameModeNames();
 ```
+
+---
+
+## Game Type Guides
+
+This section explains what the Setup Wizard generates for **each game type**, what the resulting scene hierarchy looks like, and provides a complete `GameModeBase` implementation you can use as a starting point.
+
+> **Quick start:** Run **ProtoCasual → Create New Game**, pick your game type, click Generate. Then create your GameMode script (examples below), attach it under the `GameModes` object, and assign it in `GameModeManager`.
+
+---
+
+### HyperCasual
+
+**Best for:** Stack runners, ball rollers, paint fillers, single-tap timing games — short sessions, instant restart.
+
+#### Wizard Settings
+
+| Setting | Recommended |
+|---|---|
+| Game Type | **HyperCasual** |
+| Map Type | Fixed Levels or Endless Generation |
+| Bots | None |
+| Monetization | Ads Only or Ads + IAP |
+| Store | Disabled or Enabled |
+| Input Type | Tap, Swipe, or Drag |
+| Platform | Both |
+
+#### What Gets Generated
+
+**Folders:**
+```
+Assets/_Game/Content/Chunks/   ← Place your level chunk prefabs here
+```
+
+**InGame Scene Hierarchy:**
+```
+Bootstrap               (GameBootstrap)
+GameWorld/
+  └── LevelLoader       ← Empty — attach your own level-loading logic
+Managers/
+  ├── GameManager
+  ├── GameModeManager
+  ├── AudioManager
+  ├── LevelManager
+  ├── SaveService
+  └── InputManager
+Canvas/
+  ├── GameplayScreen
+  ├── PauseScreen
+  ├── WinScreen
+  └── LoseScreen
+EventSystem
+```
+
+#### GameMode Implementation
+
+```csharp
+using UnityEngine;
+using ProtoCasual.Core.GameLoop;
+using ProtoCasual.Core.Bootstrap;
+using ProtoCasual.Core.Interfaces;
+using ProtoCasual.Core.Managers;
+
+public class HyperCasualGameMode : GameModeBase
+{
+    [Header("Settings")]
+    [SerializeField] private float moveSpeed = 8f;
+    [SerializeField] private Transform playerTransform;
+
+    private IInputService inputService;
+    private float distanceTravelled;
+    private float levelLength = 100f;
+
+    public override void Initialize()
+    {
+        inputService = ServiceLocator.Get<IInputService>();
+        distanceTravelled = 0f;
+
+        // Load the current level prefab via LevelManager
+        LevelManager.Instance.Init();
+    }
+
+    public override void OnGameStart()
+    {
+        inputService.IsInputEnabled = true;
+        distanceTravelled = 0f;
+    }
+
+    public override void UpdateMode(float deltaTime)
+    {
+        if (playerTransform == null) return;
+
+        // Auto-run forward
+        playerTransform.position += Vector3.forward * moveSpeed * deltaTime;
+        distanceTravelled += moveSpeed * deltaTime;
+
+        // Win condition: reached end of level
+        if (distanceTravelled >= levelLength)
+        {
+            GameManager.Instance.Complete();
+        }
+    }
+
+    public override void OnGameComplete()
+    {
+        inputService.IsInputEnabled = false;
+        LevelManager.Instance.NextLevel();
+    }
+
+    public override void OnGameFail()
+    {
+        inputService.IsInputEnabled = false;
+    }
+
+    public override void Cleanup()
+    {
+        LevelManager.Instance.Cleanup();
+    }
+}
+```
+
+#### Typical Flow
+
+```
+Menu → Play → [auto-run level] → Complete → NextLevel → Play
+                               → Fail → Retry / WatchAd
+```
+
+#### Recommended Mechanics
+
+| Mechanic | Use Case |
+|---|---|
+| `SwipeMovementMechanic` | Left/right lane dodging |
+| `TapToJumpMechanic` | Obstacle jumping |
+
+#### Tips
+
+- Use `EndlessGenerator` if you want infinite runs instead of fixed levels.
+- Keep the core loop under 30 seconds for hyper-casual retention.
+- Add interstitial ads on every 2nd death via `IAdsService.ShowInterstitial()`.
+- Use `IAnalyticsService.LevelStart()` / `LevelComplete()` / `LevelFail()` to track funnel.
+
+---
+
+### Endless Runner
+
+**Best for:** Subway Surfer clones, auto-scrolling runners, infinite flyers — session length limited by skill.
+
+#### Wizard Settings
+
+| Setting | Recommended |
+|---|---|
+| Game Type | **Endless** |
+| Map Type | Endless Generation |
+| Bots | None |
+| Monetization | Ads + IAP |
+| Store | Enabled |
+| Input Type | Swipe or Tap |
+| Platform | Both |
+
+#### What Gets Generated
+
+**Folders:**
+```
+Assets/_Game/Content/Chunks/   ← Place your chunk prefabs here (roads, corridors, platforms)
+```
+
+**InGame Scene Hierarchy:**
+```
+Bootstrap               (GameBootstrap)
+GameWorld/
+  └── EndlessGenerator  ← EndlessGenerator component attached
+Managers/
+  ├── GameManager
+  ├── GameModeManager
+  ├── AudioManager
+  ├── LevelManager
+  ├── SaveService
+  └── InputManager
+Canvas/
+  ├── GameplayScreen
+  ├── PauseScreen
+  ├── WinScreen
+  └── LoseScreen
+EventSystem
+```
+
+#### GameMode Implementation
+
+```csharp
+using UnityEngine;
+using ProtoCasual.Core.GameLoop;
+using ProtoCasual.Core.Bootstrap;
+using ProtoCasual.Core.Interfaces;
+using ProtoCasual.Core.Managers;
+using ProtoCasual.Core.Systems;
+
+public class EndlessRunnerGameMode : GameModeBase
+{
+    [Header("References")]
+    [SerializeField] private Transform playerTransform;
+    [SerializeField] private EndlessGenerator endlessGenerator;
+
+    [Header("Difficulty")]
+    [SerializeField] private float startSpeed = 6f;
+    [SerializeField] private float maxSpeed = 20f;
+    [SerializeField] private float accelerationPerSecond = 0.1f;
+
+    private IInputService inputService;
+    private float currentSpeed;
+    private int score;
+
+    public override void Initialize()
+    {
+        inputService = ServiceLocator.Get<IInputService>();
+        currentSpeed = startSpeed;
+        score = 0;
+
+        if (endlessGenerator == null)
+            endlessGenerator = FindAnyObjectByType<EndlessGenerator>();
+    }
+
+    public override void OnGameStart()
+    {
+        inputService.IsInputEnabled = true;
+        currentSpeed = startSpeed;
+        endlessGenerator?.Reset();
+    }
+
+    public override void UpdateMode(float deltaTime)
+    {
+        if (playerTransform == null) return;
+
+        // Accelerate over time
+        currentSpeed = Mathf.Min(currentSpeed + accelerationPerSecond * deltaTime, maxSpeed);
+
+        // Move player forward
+        playerTransform.position += Vector3.forward * currentSpeed * deltaTime;
+
+        // Score = distance
+        score = Mathf.FloorToInt(playerTransform.position.z);
+
+        // Update UI
+        var gameplay = UI.UIManager.Instance?.GetScreen<UI.GameplayScreen>();
+        gameplay?.SetScore(score);
+    }
+
+    public override void OnGameFail()
+    {
+        inputService.IsInputEnabled = false;
+
+        // Submit to leaderboard
+        if (ServiceLocator.TryGet<ILeaderboardService>(out var lb))
+            lb.SubmitScore("main", score);
+
+        // Track achievement progress
+        if (ServiceLocator.TryGet<IAchievementService>(out var ach))
+            ach.AddProgress("distance_100", score);
+    }
+
+    public override void Cleanup()
+    {
+        endlessGenerator?.Reset();
+    }
+}
+```
+
+#### Typical Flow
+
+```
+Menu → Play → [run until death] → Fail → Retry / WatchAd (continue) / Menu
+```
+
+#### Recommended Mechanics
+
+| Mechanic | Use Case |
+|---|---|
+| `SwipeMovementMechanic` | 3-lane dodging |
+| `TapToJumpMechanic` | Obstacle jumping |
+
+#### Tips
+
+- Create 10–15 chunk prefabs for variety, assign them to `EndlessGenerator.chunkPrefabs`.
+- Set `EndlessGenerator.playerTransform` to your player so chunks spawn/despawn relative to it.
+- Use difficulty scaling: `accelerationPerSecond` makes the game progressively harder.
+- Offer a rewarded-ad "second chance" in `LoseScreen` — revive the player and call `GameManager.Instance.Resume()`.
+- Track high-scores via `ILeaderboardService.SubmitScore()`.
+
+---
+
+### Puzzle
+
+**Best for:** Match-3, sliding puzzles, word games, Sudoku-likes — discrete levels, turn-based or timed.
+
+#### Wizard Settings
+
+| Setting | Recommended |
+|---|---|
+| Game Type | **Puzzle** |
+| Map Type | Fixed Levels |
+| Bots | None |
+| Monetization | Ads + IAP |
+| Store | Enabled |
+| Input Type | Tap or Drag |
+| Platform | Both |
+
+#### What Gets Generated
+
+**Folders:**
+```
+Assets/_Game/Content/Puzzles/   ← Place your puzzle data assets / prefabs here
+```
+
+**InGame Scene Hierarchy:**
+```
+Bootstrap               (GameBootstrap)
+GameWorld/
+  ├── GridSystem        ← Empty — attach your grid/board logic
+  └── MatchLogic        ← Empty — attach your match/win detection
+Managers/
+  ├── GameManager
+  ├── GameModeManager
+  ├── AudioManager
+  ├── LevelManager
+  ├── SaveService
+  └── InputManager
+Canvas/
+  ├── GameplayScreen
+  ├── PauseScreen
+  ├── WinScreen
+  └── LoseScreen
+EventSystem
+```
+
+#### GameMode Implementation
+
+```csharp
+using UnityEngine;
+using ProtoCasual.Core.GameLoop;
+using ProtoCasual.Core.Bootstrap;
+using ProtoCasual.Core.Interfaces;
+using ProtoCasual.Core.Managers;
+using ProtoCasual.Core.UI;
+
+public class PuzzleGameMode : GameModeBase
+{
+    [Header("Puzzle")]
+    [SerializeField] private int gridWidth = 6;
+    [SerializeField] private int gridHeight = 6;
+    [SerializeField] private int targetScore = 1000;
+    [SerializeField] private int maxMoves = 20;
+
+    private int currentScore;
+    private int movesRemaining;
+    private IInputService inputService;
+
+    // Reference to your custom grid/board component
+    // [SerializeField] private GridBoard board;
+
+    public override void Initialize()
+    {
+        inputService = ServiceLocator.Get<IInputService>();
+        LevelManager.Instance.Init();
+    }
+
+    public override void OnGameStart()
+    {
+        currentScore = 0;
+        movesRemaining = maxMoves;
+        inputService.IsInputEnabled = true;
+
+        // Generate board
+        // board.GenerateGrid(gridWidth, gridHeight);
+
+        UpdateUI();
+    }
+
+    /// <summary>
+    /// Call this from your match/swap logic when the player makes a move.
+    /// </summary>
+    public void OnPlayerMove(int pointsScored)
+    {
+        currentScore += pointsScored;
+        movesRemaining--;
+        UpdateUI();
+
+        // Win condition
+        if (currentScore >= targetScore)
+        {
+            GameManager.Instance.Complete();
+            return;
+        }
+
+        // Lose condition
+        if (movesRemaining <= 0)
+        {
+            GameManager.Instance.Fail();
+        }
+    }
+
+    public override void OnGameComplete()
+    {
+        inputService.IsInputEnabled = false;
+
+        // Grant level reward
+        if (ServiceLocator.TryGet<IRewardService>(out var rewards))
+            rewards.GrantLevelReward(LevelManager.Instance.CurrentLevelIndex);
+
+        // Track analytics
+        if (ServiceLocator.TryGet<IAnalyticsService>(out var analytics))
+            analytics.LevelComplete(LevelManager.Instance.CurrentLevelIndex,
+                                    GameManager.Instance.GetGameTime());
+    }
+
+    public override void OnGameFail()
+    {
+        inputService.IsInputEnabled = false;
+
+        if (ServiceLocator.TryGet<IAnalyticsService>(out var analytics))
+            analytics.LevelFail(LevelManager.Instance.CurrentLevelIndex,
+                                GameManager.Instance.GetGameTime());
+    }
+
+    public override void OnGamePause()
+    {
+        inputService.IsInputEnabled = false;
+    }
+
+    public override void OnGameResume()
+    {
+        inputService.IsInputEnabled = true;
+    }
+
+    public override void Cleanup()
+    {
+        // board?.ClearGrid();
+        LevelManager.Instance.Cleanup();
+    }
+
+    private void UpdateUI()
+    {
+        var gameplay = UIManager.Instance?.GetScreen<GameplayScreen>();
+        gameplay?.SetScore(currentScore);
+        gameplay?.SetProgress((float)currentScore / targetScore);
+    }
+}
+```
+
+#### Typical Flow
+
+```
+Menu → Play → [solve puzzle within move limit] → Complete → NextLevel
+                                                → Fail → Retry / WatchAd (+5 moves)
+```
+
+#### Tips
+
+- Use `LevelConfig` ScriptableObjects to define per-level parameters (grid size, target score, move limit).
+- The `GridSystem` and `MatchLogic` GameObjects are empty stubs — attach your own board and match-detection scripts.
+- Use `IInputService.OnTap` for tile selection and `IInputService.OnDrag` for swipe-to-swap.
+- Show an interstitial ad every 3 levels using `IAdsService.ShowInterstitial()`.
+- Store power-ups (extra moves, hints) via `IStoreService` + `IInventoryService`.
+
+---
+
+### Racing
+
+**Best for:** Kart racers, drag racers, lane-based racing, traffic dodging — timed laps or first-to-finish.
+
+#### Wizard Settings
+
+| Setting | Recommended |
+|---|---|
+| Game Type | **Racing** |
+| Map Type | Fixed Levels |
+| Bots | Simple AI or Advanced AI |
+| Monetization | Ads + IAP |
+| Store | Enabled |
+| Input Type | Steering or Swipe |
+| Platform | Both |
+
+#### What Gets Generated
+
+**Folders:**
+```
+Assets/_Game/Content/Tracks/    ← Place your track prefabs here
+Assets/_Game/Content/Vehicles/  ← Place your vehicle prefabs / models here
+Assets/_Game/Content/Bots/      ← Place bot variant configs here (if bots enabled)
+```
+
+**InGame Scene Hierarchy:**
+```
+Bootstrap               (GameBootstrap)
+GameWorld/
+  ├── TrackGenerator    ← Empty — attach your track loading/generation logic
+  └── BotSpawner        ← Empty — attach your bot spawning logic (if bots enabled)
+Managers/
+  ├── GameManager
+  ├── GameModeManager
+  ├── AudioManager
+  ├── LevelManager
+  ├── SaveService
+  └── InputManager
+Canvas/
+  ├── GameplayScreen
+  ├── PauseScreen
+  ├── WinScreen
+  └── LoseScreen
+EventSystem
+```
+
+#### GameMode Implementation
+
+```csharp
+using UnityEngine;
+using ProtoCasual.Core.GameLoop;
+using ProtoCasual.Core.Bootstrap;
+using ProtoCasual.Core.Interfaces;
+using ProtoCasual.Core.Managers;
+using ProtoCasual.Core.UI;
+
+public class RacingGameMode : GameModeBase
+{
+    [Header("Track")]
+    [SerializeField] private Transform[] checkpoints;
+    [SerializeField] private int totalLaps = 3;
+
+    [Header("Player")]
+    [SerializeField] private Transform playerVehicle;
+    [SerializeField] private float topSpeed = 30f;
+
+    [Header("Bots")]
+    [SerializeField] private GameObject[] botPrefabs;
+    [SerializeField] private Transform[] spawnPoints;
+
+    private IInputService inputService;
+    private int currentCheckpoint;
+    private int currentLap;
+    private int playerPosition;  // 1st, 2nd, 3rd...
+
+    public override void Initialize()
+    {
+        inputService = ServiceLocator.Get<IInputService>();
+
+        // Load track from LevelConfig
+        LevelManager.Instance.Init();
+
+        // Spawn bots
+        SpawnBots();
+    }
+
+    public override void OnGameStart()
+    {
+        inputService.IsInputEnabled = true;
+        currentCheckpoint = 0;
+        currentLap = 0;
+    }
+
+    public override void UpdateMode(float deltaTime)
+    {
+        if (playerVehicle == null) return;
+
+        // Check if player reached the next checkpoint
+        if (checkpoints != null && currentCheckpoint < checkpoints.Length)
+        {
+            float dist = Vector3.Distance(playerVehicle.position,
+                                          checkpoints[currentCheckpoint].position);
+            if (dist < 5f)
+            {
+                currentCheckpoint++;
+
+                // Completed a lap?
+                if (currentCheckpoint >= checkpoints.Length)
+                {
+                    currentCheckpoint = 0;
+                    currentLap++;
+
+                    if (currentLap >= totalLaps)
+                    {
+                        GameManager.Instance.Complete();
+                    }
+                }
+            }
+        }
+
+        // Update HUD
+        var gameplay = UIManager.Instance?.GetScreen<GameplayScreen>();
+        gameplay?.SetProgress((float)(currentLap * checkpoints.Length + currentCheckpoint)
+                              / (totalLaps * checkpoints.Length));
+    }
+
+    public override void OnGameComplete()
+    {
+        inputService.IsInputEnabled = false;
+
+        // Submit race time to leaderboard
+        float raceTime = GameManager.Instance.GetGameTime();
+        if (ServiceLocator.TryGet<ILeaderboardService>(out var lb))
+            lb.SubmitScore("race_time", Mathf.FloorToInt(raceTime * 1000));
+    }
+
+    public override void OnGameFail()
+    {
+        inputService.IsInputEnabled = false;
+    }
+
+    public override void Cleanup()
+    {
+        DestroyBots();
+        LevelManager.Instance.Cleanup();
+    }
+
+    private void SpawnBots()
+    {
+        // Use BotConfig + IBot interface to spawn AI racers
+        // at spawnPoints positions
+    }
+
+    private void DestroyBots()
+    {
+        // Cleanup bot instances
+    }
+}
+```
+
+#### Typical Flow
+
+```
+Menu → Play → [countdown 3-2-1] → Racing → [complete laps] → Complete → NextTrack
+                                           → Fail (timed out / crashed) → Retry
+```
+
+#### Recommended Mechanics
+
+| Mechanic | Use Case |
+|---|---|
+| `SteeringMechanic` | Full steering wheel / tilt controls |
+| `SwipeMovementMechanic` | Lane-based racing (swipe left/right) |
+
+#### Tips
+
+- Use the `SteeringMechanic` for freeform driving or `SwipeMovementMechanic` for lane-based racing.
+- Store each track as a `LevelConfig` with the track prefab. The `TrackGenerator` object is an empty stub for your track-loading code.
+- Create `BotConfig` ScriptableObjects with different difficulty tiers. Use `useRubberBanding` to keep races competitive.
+- Use the `Prepare` state for a countdown: `GameManager.Instance.ChangeState(GameState.Prepare)` → wait 3 seconds → `GameManager.Instance.Play()`.
+- Sell vehicle skins via the Store system with `ItemType.Cosmetic`.
+
+---
+
+### Hybrid
+
+**Best for:** Games that mix multiple mechanics — base-builder + runner, RPG + puzzle, merge + idle — or games that don't fit neatly into one category.
+
+#### Wizard Settings
+
+| Setting | Recommended |
+|---|---|
+| Game Type | **Hybrid** |
+| Map Type | Fixed Levels, Procedural, or Endless |
+| Bots | Any |
+| Monetization | Ads + IAP |
+| Store | Enabled |
+| Input Type | Mixed |
+| Platform | Both |
+
+#### What Gets Generated
+
+**Folders:**
+```
+Assets/_Game/Content/Levels/   ← Place your level data / prefabs here
+```
+
+If **Map Type** is set to Procedural or Endless, also creates a `MapGenerator` in the scene.
+
+**InGame Scene Hierarchy:**
+```
+Bootstrap               (GameBootstrap)
+GameWorld/
+  ├── LevelLoader       ← Empty — attach your level loading logic
+  └── MapGenerator      ← MapGenerator component (if procedural/endless selected)
+Managers/
+  ├── GameManager
+  ├── GameModeManager
+  ├── AudioManager
+  ├── LevelManager
+  ├── SaveService
+  └── InputManager
+Canvas/
+  ├── GameplayScreen
+  ├── PauseScreen
+  ├── WinScreen
+  └── LoseScreen
+EventSystem
+```
+
+#### GameMode Implementation — Multi-Phase Example
+
+A hybrid game often has distinct **phases** within a single session. Here's a pattern that switches between a build phase and an action phase:
+
+```csharp
+using UnityEngine;
+using ProtoCasual.Core.GameLoop;
+using ProtoCasual.Core.Bootstrap;
+using ProtoCasual.Core.Interfaces;
+using ProtoCasual.Core.Managers;
+using ProtoCasual.Core.Systems;
+using ProtoCasual.Core.UI;
+
+public class HybridGameMode : GameModeBase
+{
+    public enum Phase { Build, Action }
+
+    [Header("Phases")]
+    [SerializeField] private float buildPhaseDuration = 30f;
+    [SerializeField] private float actionPhaseDuration = 60f;
+
+    [Header("Map")]
+    [SerializeField] private MapGenerator mapGenerator;
+    [SerializeField] private ScriptableObjects.MapConfig mapConfig;
+
+    [Header("Mechanics")]
+    [SerializeField] private MechanicBase[] buildMechanics;
+    [SerializeField] private MechanicBase[] actionMechanics;
+
+    private IInputService inputService;
+    private Phase currentPhase;
+    private float phaseTimer;
+    private int score;
+
+    public override void Initialize()
+    {
+        inputService = ServiceLocator.Get<IInputService>();
+
+        // Generate the map
+        if (mapGenerator != null && mapConfig != null)
+            mapGenerator.GenerateMap(mapConfig);
+    }
+
+    public override void OnGameStart()
+    {
+        inputService.IsInputEnabled = true;
+        score = 0;
+        StartPhase(Phase.Build);
+    }
+
+    public override void UpdateMode(float deltaTime)
+    {
+        phaseTimer -= deltaTime;
+
+        // Update active mechanics
+        var activeMechanics = currentPhase == Phase.Build ? buildMechanics : actionMechanics;
+        if (activeMechanics != null)
+        {
+            foreach (var m in activeMechanics)
+                m.UpdateMechanic(deltaTime);
+        }
+
+        // Phase timer expired
+        if (phaseTimer <= 0f)
+        {
+            switch (currentPhase)
+            {
+                case Phase.Build:
+                    StartPhase(Phase.Action);
+                    break;
+                case Phase.Action:
+                    GameManager.Instance.Complete();
+                    break;
+            }
+        }
+
+        // Update HUD
+        var gameplay = UIManager.Instance?.GetScreen<GameplayScreen>();
+        gameplay?.SetScore(score);
+    }
+
+    public void AddScore(int points)
+    {
+        score += points;
+    }
+
+    public override void OnGameComplete()
+    {
+        inputService.IsInputEnabled = false;
+        DisableAllMechanics();
+
+        if (ServiceLocator.TryGet<IRewardService>(out var rewards))
+            rewards.GrantLevelReward(LevelManager.Instance.CurrentLevelIndex);
+    }
+
+    public override void OnGameFail()
+    {
+        inputService.IsInputEnabled = false;
+        DisableAllMechanics();
+    }
+
+    public override void Cleanup()
+    {
+        DisableAllMechanics();
+        mapGenerator?.ClearMap();
+    }
+
+    private void StartPhase(Phase phase)
+    {
+        currentPhase = phase;
+        DisableAllMechanics();
+
+        switch (phase)
+        {
+            case Phase.Build:
+                phaseTimer = buildPhaseDuration;
+                EnableMechanics(buildMechanics);
+                break;
+            case Phase.Action:
+                phaseTimer = actionPhaseDuration;
+                EnableMechanics(actionMechanics);
+                break;
+        }
+    }
+
+    private void EnableMechanics(MechanicBase[] mechanics)
+    {
+        if (mechanics == null) return;
+        foreach (var m in mechanics)
+        {
+            m.Initialize();
+            m.Enable();
+        }
+    }
+
+    private void DisableAllMechanics()
+    {
+        DisableMechanics(buildMechanics);
+        DisableMechanics(actionMechanics);
+    }
+
+    private void DisableMechanics(MechanicBase[] mechanics)
+    {
+        if (mechanics == null) return;
+        foreach (var m in mechanics) m.Disable();
+    }
+}
+```
+
+#### Typical Flow
+
+```
+Menu → Play → [Build Phase: 30s] → [Action Phase: 60s] → Complete → NextLevel
+                                                        → Fail → Retry
+```
+
+#### Tips
+
+- Use the `buildMechanics` / `actionMechanics` split to enable/disable different input schemes per phase.
+- The `MapGenerator` is ideal for hybrid games with procedurally generated arenas.
+- Combine the `Inventory` + `Equipment` + `Store` systems to create RPG-like item loops.
+- Use `GameModeManager` to support multiple sub-modes within a single hybrid game (e.g., "Story" vs "Endless" modes).
+- Track phase-specific analytics: `analytics.TrackEvent("phase_complete", "phase", currentPhase.ToString())`.
+
+---
+
+### Quick Comparison
+
+| Feature | HyperCasual | Endless | Puzzle | Racing | Hybrid |
+|---|---|---|---|---|---|
+| **Session length** | 15–30s | 1–5 min | 1–3 min | 1–3 min | 2–10 min |
+| **Level structure** | Fixed / Endless | Infinite chunks | Fixed levels | Track-based | Multi-phase |
+| **Win condition** | Reach end | Beat high score | Target score | Finish laps | Phase-based |
+| **Primary input** | Tap / Swipe | Swipe / Tap | Tap / Drag | Steering | Mixed |
+| **Recommended map** | Fixed or Endless | Endless Generation | Fixed | Fixed | Procedural |
+| **Bots** | Rare | None | None | Common | Optional |
+| **Store** | Optional | Recommended | Recommended | Recommended | Recommended |
+| **Key mechanic** | SwipeMovement | TapToJump | Custom grid | Steering | Multiple |
+| **Generated folders** | `Chunks/` | `Chunks/` | `Puzzles/` | `Tracks/`, `Vehicles/` | `Levels/` |
+| **Scene objects** | LevelLoader | EndlessGenerator | GridSystem, MatchLogic | TrackGenerator, BotSpawner | LevelLoader, MapGenerator |
 
 ---
 
@@ -522,6 +1411,43 @@ inventory.Clear();
 // React to changes
 inventory.OnInventoryChanged += () => RefreshInventoryUI();
 ```
+
+---
+
+## Equipment System
+
+Slot-based equipment that integrates with the Inventory System. Equipping an item consumes it from inventory; unequipping returns it.
+
+```csharp
+using ProtoCasual.Core.Bootstrap;
+using ProtoCasual.Core.Interfaces;
+
+var equip = ServiceLocator.Get<IEquipmentService>();
+
+// Equip (removes the item from inventory)
+equip.Equip("weapon", "sword_01");
+equip.Equip("helmet", "iron_helm");
+
+// Query
+string weapon = equip.GetEquipped("weapon"); // "sword_01"
+bool empty = equip.IsSlotEmpty("shield");     // true
+
+// Unequip (returns item to inventory)
+equip.Unequip("weapon");
+
+// List all slots
+var slots = equip.GetAll();
+foreach (var slot in slots)
+    Debug.Log($"[{slot.SlotName}] = {slot.ItemId}");
+
+// Clear all (returns everything to inventory)
+equip.Clear();
+
+// React to changes
+equip.OnEquipmentChanged += () => RefreshEquipmentUI();
+```
+
+> **Note:** `EquipmentService` is auto-registered by `GameBootstrap`. It takes an optional `IInventoryService` dependency — if present, item counts are kept in sync automatically.
 
 ---
 
@@ -830,6 +1756,17 @@ Add `GameEventListener` component → assign the `GameEvent` → wire `UnityEven
 
 ### Typed Events
 
+All typed events extend the generic `GameEvent<T>` base class.
+
+**Built-in typed events:**
+
+| Asset Menu Path | Class | Value Type |
+|---|---|---|
+| ProtoCasual/Events/Bool Event | `GameEventBool` | `bool` |
+| ProtoCasual/Events/Int Event | `GameEventInt` | `int` |
+| ProtoCasual/Events/Float Event | `GameEventFloat` | `float` |
+| ProtoCasual/Events/String Event | `GameEventString` | `string` |
+
 ```csharp
 // Bool event
 [SerializeField] private GameEventBool onToggle;
@@ -840,6 +1777,28 @@ onToggle.RegisterListener(value => Debug.Log(value));
 [SerializeField] private GameEventInt onScoreChanged;
 onScoreChanged.Raise(1500);
 onScoreChanged.RegisterListener(score => scoreText.text = $"{score}");
+
+// Float event
+[SerializeField] private GameEventFloat onHealthChanged;
+onHealthChanged.Raise(0.75f);
+onHealthChanged.RegisterListener(hp => healthBar.fillAmount = hp);
+
+// String event
+[SerializeField] private GameEventString onNotification;
+onNotification.Raise("Level Up!");
+onNotification.RegisterListener(msg => notificationText.text = msg);
+```
+
+### Custom Typed Events
+
+Create your own typed event in one line by extending `GameEvent<T>`:
+
+```csharp
+using UnityEngine;
+using ProtoCasual.Core.Events;
+
+[CreateAssetMenu(menuName = "ProtoCasual/Events/Vector3 Event")]
+public class GameEventVector3 : GameEvent<Vector3> { }
 ```
 
 ---
@@ -857,27 +1816,27 @@ public class DoubleJumpMechanic : MechanicBase
 
     private int jumpsRemaining;
 
-    protected override void OnInitialize()
+    protected override void OnMechanicInitialize()
     {
         jumpsRemaining = 2;
     }
 
-    protected override void OnEnable()
+    protected override void OnMechanicEnable()
     {
         // Subscribe to input
     }
 
-    protected override void OnDisable()
+    protected override void OnMechanicDisable()
     {
         // Unsubscribe
     }
 
-    protected override void OnUpdate(float deltaTime)
+    protected override void OnMechanicUpdate(float deltaTime)
     {
         // Check jump input, apply force
     }
 
-    protected override void OnCleanup()
+    protected override void OnMechanicCleanup()
     {
         jumpsRemaining = 0;
     }
@@ -1465,11 +2424,11 @@ com.bayturan.protocasual/
 │   ├── Bootstrap/      GameBootstrap, ServiceLocator
 │   ├── Currency/       CurrencyService
 │   ├── Data/           PlayerData, PlayerDataProvider
-│   ├── Events/         GameEvent, GameEventListener, GameEventBool, GameEventInt
+│   ├── Events/         GameEvent, GameEvent<T>, GameEventListener, GameEventBool, GameEventInt, GameEventFloat, GameEventString
 │   ├── GameLoop/       GameModeBase, GameState
 │   ├── Haptics/        HapticService
-│   ├── Interfaces/     24 interfaces
-│   ├── Inventory/      InventoryService
+│   ├── Interfaces/     25 interfaces (incl. IEquipmentService)
+│   ├── Inventory/      InventoryService, EquipmentService
 │   ├── Leaderboard/    LocalLeaderboardService
 │   ├── Managers/       GameManager, AudioManager, GameModeManager, LevelManager, SaveManager, SaveService
 │   ├── Rewards/        RewardService, DailyRewardService
