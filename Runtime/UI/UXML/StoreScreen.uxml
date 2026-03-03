@@ -16,9 +16,11 @@
             <ui:Button name="close-btn" text="✕" class="btn btn-close" />
         </ui:VisualElement>
 
-        <!-- Body -->
-        <ui:VisualElement class="shop-body">
+        <!-- Body: stacked vertically for portrait mobile -->
+        <ui:ScrollView class="shop-body">
             <ui:ScrollView name="item-list" class="item-list" />
+
+            <!-- Detail panel appears below selected item -->
             <ui:VisualElement name="detail-panel" class="detail-panel">
                 <ui:Label name="detail-name" text="" class="detail-name" />
                 <ui:Label name="detail-description" text="" class="detail-desc" />
@@ -29,6 +31,6 @@
                 </ui:VisualElement>
                 <ui:Label name="feedback-text" text="" class="feedback-text" />
             </ui:VisualElement>
-        </ui:VisualElement>
+        </ui:ScrollView>
     </ui:VisualElement>
 </ui:UXML>

@@ -63,6 +63,13 @@ namespace ProtoCasual.Core.UI
         private VisualElement screenContainer;
         private VisualElement popupContainer;
 
+        /// <summary>Minimum horizontal padding (USS px) applied to screens.</summary>
+        private const float BasePaddingH = 32f;
+
+        private Rect lastSafeArea;
+        private int lastScreenWidth;
+        private int lastScreenHeight;
+
         public PopupManager Popups { get; private set; }
         public ThemeManager Theme { get; private set; }
         public string CurrentScreenName => currentScreen?.ScreenName;
@@ -127,6 +134,9 @@ namespace ProtoCasual.Core.UI
             if (GameManager.Instance != null)
                 GameManager.Instance.OnStateChanged += HandleStateChange;
 
+            // Apply safe area once layout is ready
+            root.RegisterCallback<GeometryChangedEvent>(_ => ApplySafeArea());
+
             // Show menu
             ShowScreen(menuScreenName);
         }
@@ -150,6 +160,7 @@ namespace ProtoCasual.Core.UI
             switch (current)
             {
                 case GameState.Menu:      ShowScreen(menuScreenName);     break;
+                case GameState.Prepare:   ShowScreen(gameplayScreenName); break;
                 case GameState.Playing:   ShowScreen(gameplayScreenName); break;
                 case GameState.Completed: ShowScreen(winScreenName);      break;
                 case GameState.Failed:    ShowScreen(loseScreenName);     break;
@@ -231,6 +242,63 @@ namespace ProtoCasual.Core.UI
         private void Update()
         {
             currentScreen?.OnUpdate(Time.deltaTime);
+
+            // Re-apply safe area when screen dimensions or safe area change (orientation flip, etc.)
+            if (Screen.safeArea != lastSafeArea || Screen.width != lastScreenWidth || Screen.height != lastScreenHeight)
+                ApplySafeArea();
+        }
+
+        // ─── Safe Area ─────────────────────────────────────────────
+
+        /// <summary>
+        /// Reads <see cref="Screen.safeArea"/>, converts to panel coordinates,
+        /// and applies padding to every <c>.screen</c> element and the popup container
+        /// so content avoids the notch / home-indicator / camera cut-out.
+        /// Backgrounds still extend edge-to-edge because padding is inside the element.
+        /// </summary>
+        private void ApplySafeArea()
+        {
+            var root = uiDocument.rootVisualElement;
+            float panelH = root.resolvedStyle.height;
+            float panelW = root.resolvedStyle.width;
+            if (panelH <= 0 || panelW <= 0) return;   // layout not ready
+
+            var safe = Screen.safeArea;
+            lastSafeArea = safe;
+            lastScreenWidth = Screen.width;
+            lastScreenHeight = Screen.height;
+
+            // Insets in screen pixels
+            float topPx = Screen.height - safe.yMax;
+            float bottomPx = safe.y;
+            float leftPx = safe.x;
+            float rightPx = Screen.width - safe.xMax;
+
+            // Convert to panel (USS) pixels
+            float scaleX = panelW / Screen.width;
+            float scaleY = panelH / Screen.height;
+
+            float safeTop = topPx * scaleY;
+            float safeBottom = bottomPx * scaleY;
+            float safeLeft = leftPx * scaleX;
+            float safeRight = rightPx * scaleX;
+
+            // Apply to every .screen element — their background extends edge-to-edge,
+            // only content is inset.  Horizontal padding is at least BasePaddingH.
+            var screenElements = screenContainer.Query(className: "screen").ToList();
+            foreach (var el in screenElements)
+            {
+                el.style.paddingTop = safeTop;
+                el.style.paddingBottom = safeBottom;
+                el.style.paddingLeft = Mathf.Max(BasePaddingH, safeLeft);
+                el.style.paddingRight = Mathf.Max(BasePaddingH, safeRight);
+            }
+
+            // Inset the popup overlay so popups also respect safe area
+            popupContainer.style.top = safeTop;
+            popupContainer.style.bottom = safeBottom;
+            popupContainer.style.left = safeLeft;
+            popupContainer.style.right = safeRight;
         }
     }
 }

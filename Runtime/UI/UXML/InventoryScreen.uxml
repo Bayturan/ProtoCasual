@@ -6,8 +6,8 @@
             <ui:Button name="close-btn" text="✕" class="btn btn-close" />
         </ui:VisualElement>
 
-        <!-- Body -->
-        <ui:VisualElement class="inventory-body">
+        <!-- Body: stacked vertically for portrait mobile -->
+        <ui:ScrollView class="inventory-body">
             <!-- Empty State -->
             <ui:VisualElement name="empty-state" class="empty-state">
                 <ui:Label text="No items yet. Visit the Store!" class="empty-text" />
@@ -16,13 +16,13 @@
             <!-- Item List -->
             <ui:ScrollView name="item-list" class="item-list" />
 
-            <!-- Detail Panel -->
+            <!-- Detail Panel (appears below selected item) -->
             <ui:VisualElement name="detail-panel" class="detail-panel">
                 <ui:Label name="detail-name" text="" class="detail-name" />
                 <ui:Label name="detail-description" text="" class="detail-desc" />
                 <ui:Label name="detail-quantity" text="" class="detail-stat" />
                 <ui:Label name="detail-type" text="" class="detail-stat" />
             </ui:VisualElement>
-        </ui:VisualElement>
+        </ui:ScrollView>
     </ui:VisualElement>
 </ui:UXML>

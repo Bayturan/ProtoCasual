@@ -6,8 +6,8 @@
             <ui:Button name="close-btn" text="✕" class="btn btn-close" />
         </ui:VisualElement>
 
-        <!-- Body -->
-        <ui:VisualElement class="settings-body">
+        <!-- Body: scrollable for shorter screens -->
+        <ui:ScrollView class="settings-body">
             <!-- Audio Group -->
             <ui:VisualElement class="settings-group">
                 <ui:Label text="Audio" class="group-title" />
@@ -43,6 +43,6 @@
                 <ui:Label text="Data" class="group-title" />
                 <ui:Button name="reset-data-btn" text="RESET ALL DATA" class="btn btn-danger" />
             </ui:VisualElement>
-        </ui:VisualElement>
+        </ui:ScrollView>
     </ui:VisualElement>
 </ui:UXML>
