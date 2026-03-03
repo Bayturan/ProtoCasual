@@ -1,290 +1,63 @@
 using UnityEngine;
 using UnityEditor;
-using UnityEngine.UI;
-using TMPro;
 
 namespace ProtoCasual.Editor
 {
     /// <summary>
-    /// Generates UI screen prefabs (Menu, Gameplay, Win, Lose, Pause, Store, Settings)
-    /// and saves them to Assets/_Game/UI/.
+    /// Copies the selected game-type USS theme to the project for customisation.
+    /// The original UXML templates remain in the package (read-only).
+    /// Users edit Assets/_Game/UI/Themes/GameTheme.uss to reskin their game.
     /// </summary>
     public static class UIPrefabGenerator
     {
-        private const string UI_DIR = "Assets/_Game/UI";
+        private const string PKG_USS = "Packages/com.bayturan.protocasual/Runtime/UI/USS";
 
         public static void Generate(GameSetupConfig cfg)
         {
-            EnsureDir(UI_DIR);
-
-            CreateScreenPrefab("MenuScreen", BuildMenuScreen);
-            CreateScreenPrefab("GameplayScreen", BuildGameplayScreen);
-            CreateScreenPrefab("WinScreen", BuildWinScreen);
-            CreateScreenPrefab("LoseScreen", BuildLoseScreen);
-            CreateScreenPrefab("PauseScreen", BuildPauseScreen);
-
-            if (cfg.store == StoreOption.Enabled)
-                CreateScreenPrefab("StoreScreen", BuildStoreScreen);
-
-            CreateScreenPrefab("SettingsScreen", BuildSettingsScreen);
-
-            if (cfg.enablePopups)
-            {
-                CreateScreenPrefab("ConfirmPopup", BuildConfirmPopup);
-                CreateScreenPrefab("RewardPopup", BuildRewardPopup);
-            }
-
+            CopyThemeToProject(cfg.gameType);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            Debug.Log("[ProtoCasual] UI prefabs created.");
+            Debug.Log("[ProtoCasual] UI theme copied to project for customisation.");
         }
 
-        // ─── Screen builders ────────────────────────────────────────────
-
-        private static void BuildMenuScreen(GameObject root)
+        private static void CopyThemeToProject(GameType gameType)
         {
-            AddBackground(root, new Color(0.1f, 0.1f, 0.15f, 1f));
-            AddText(root, "Title", "GAME TITLE", 64, TextAlignmentOptions.Center,
-                new Vector2(0, 100), new Vector2(600, 80));
-            AddButton(root, "PlayButton", "PLAY",
-                new Vector2(0, -20), new Vector2(300, 60));
-            AddButton(root, "SettingsButton", "SETTINGS",
-                new Vector2(0, -100), new Vector2(300, 60));
+            string themeFile = GetThemeFileName(gameType);
+            string srcPath = $"{PKG_USS}/Themes/{themeFile}.uss";
+            string dstDir = "Assets/_Game/UI/Themes";
+            string dstPath = $"{dstDir}/GameTheme.uss";
+
+            EnsureDir(dstDir);
+
+            // Don't overwrite if the user already has a custom theme
+            if (AssetDatabase.LoadAssetAtPath<Object>(dstPath) != null)
+            {
+                Debug.Log("[ProtoCasual] Project theme already exists — skipping copy.");
+                return;
+            }
+
+            if (!AssetDatabase.CopyAsset(srcPath, dstPath))
+            {
+                // Fallback: read from package and create in project
+                var srcContent = System.IO.File.ReadAllText(
+                    System.IO.Path.GetFullPath(srcPath));
+                System.IO.File.WriteAllText(
+                    System.IO.Path.GetFullPath(dstPath), srcContent);
+                AssetDatabase.ImportAsset(dstPath);
+            }
+
+            Debug.Log($"[ProtoCasual] Theme '{themeFile}' → {dstPath}");
         }
 
-        private static void BuildGameplayScreen(GameObject root)
+        private static string GetThemeFileName(GameType type) => type switch
         {
-            AddText(root, "ScoreText", "Score: 0", 32, TextAlignmentOptions.TopLeft,
-                new Vector2(-300, 400), new Vector2(300, 50));
-            AddText(root, "LevelText", "Level 1", 28, TextAlignmentOptions.Top,
-                new Vector2(0, 400), new Vector2(200, 50));
-            AddButton(root, "PauseButton", "||",
-                new Vector2(350, 400), new Vector2(80, 80));
-        }
-
-        private static void BuildWinScreen(GameObject root)
-        {
-            AddBackground(root, new Color(0f, 0.2f, 0f, 0.85f));
-            AddText(root, "WinTitle", "YOU WIN!", 72, TextAlignmentOptions.Center,
-                new Vector2(0, 100), new Vector2(600, 100));
-            AddButton(root, "NextLevelButton", "NEXT LEVEL",
-                new Vector2(0, -30), new Vector2(300, 60));
-            AddButton(root, "MenuButton", "MENU",
-                new Vector2(0, -110), new Vector2(300, 60));
-        }
-
-        private static void BuildLoseScreen(GameObject root)
-        {
-            AddBackground(root, new Color(0.3f, 0f, 0f, 0.85f));
-            AddText(root, "LoseTitle", "GAME OVER", 72, TextAlignmentOptions.Center,
-                new Vector2(0, 100), new Vector2(600, 100));
-            AddButton(root, "RetryButton", "RETRY",
-                new Vector2(0, -30), new Vector2(300, 60));
-            AddButton(root, "MenuButton", "MENU",
-                new Vector2(0, -110), new Vector2(300, 60));
-        }
-
-        private static void BuildPauseScreen(GameObject root)
-        {
-            AddBackground(root, new Color(0f, 0f, 0f, 0.7f));
-            AddText(root, "PauseTitle", "PAUSED", 64, TextAlignmentOptions.Center,
-                new Vector2(0, 120), new Vector2(400, 80));
-            AddButton(root, "ResumeButton", "RESUME",
-                new Vector2(0, 0), new Vector2(300, 60));
-            AddButton(root, "RestartButton", "RESTART",
-                new Vector2(0, -80), new Vector2(300, 60));
-            AddButton(root, "QuitButton", "QUIT",
-                new Vector2(0, -160), new Vector2(300, 60));
-        }
-
-        private static void BuildStoreScreen(GameObject root)
-        {
-            AddBackground(root, new Color(0.05f, 0.05f, 0.1f, 1f));
-            AddText(root, "StoreTitle", "STORE", 54, TextAlignmentOptions.Center,
-                new Vector2(0, 350), new Vector2(400, 70));
-            AddButton(root, "CloseButton", "X",
-                new Vector2(380, 400), new Vector2(60, 60));
-
-            // Content area placeholder
-            var content = new GameObject("Content");
-            content.transform.SetParent(root.transform, false);
-            var rt = content.AddComponent<RectTransform>();
-            rt.anchoredPosition = Vector2.zero;
-            rt.sizeDelta = new Vector2(700, 600);
-        }
-
-        private static void BuildSettingsScreen(GameObject root)
-        {
-            AddBackground(root, new Color(0.08f, 0.08f, 0.12f, 1f));
-            AddText(root, "SettingsTitle", "SETTINGS", 54, TextAlignmentOptions.Center,
-                new Vector2(0, 300), new Vector2(400, 70));
-            AddButton(root, "CloseButton", "X",
-                new Vector2(380, 400), new Vector2(60, 60));
-
-            // Music toggle
-            AddText(root, "MusicLabel", "Music", 28, TextAlignmentOptions.Left,
-                new Vector2(-100, 140), new Vector2(200, 40));
-            AddToggle(root, "MusicToggle", true, new Vector2(200, 140));
-
-            // SFX toggle
-            AddText(root, "SfxLabel", "SFX", 28, TextAlignmentOptions.Left,
-                new Vector2(-100, 80), new Vector2(200, 40));
-            AddToggle(root, "SfxToggle", true, new Vector2(200, 80));
-
-            // Vibration toggle
-            AddText(root, "VibrationLabel", "Vibration", 28, TextAlignmentOptions.Left,
-                new Vector2(-100, 20), new Vector2(200, 40));
-            AddToggle(root, "VibrationToggle", true, new Vector2(200, 20));
-
-            // Reset button
-            AddButton(root, "ResetDataButton", "RESET DATA",
-                new Vector2(0, -120), new Vector2(300, 60));
-        }
-
-        private static void BuildConfirmPopup(GameObject root)
-        {
-            AddBackground(root, new Color(0f, 0f, 0f, 0.75f));
-            // Panel
-            var panel = new GameObject("Panel");
-            panel.transform.SetParent(root.transform, false);
-            var prt = panel.AddComponent<RectTransform>();
-            prt.anchoredPosition = Vector2.zero;
-            prt.sizeDelta = new Vector2(600, 400);
-            var pimg = panel.AddComponent<Image>();
-            pimg.color = new Color(0.15f, 0.15f, 0.2f, 1f);
-
-            AddText(panel, "TitleText", "Confirm", 36, TextAlignmentOptions.Center,
-                new Vector2(0, 120), new Vector2(500, 50));
-            AddText(panel, "MessageText", "Are you sure?", 24, TextAlignmentOptions.Center,
-                new Vector2(0, 30), new Vector2(500, 80));
-            AddButton(panel, "ConfirmButton", "OK",
-                new Vector2(-110, -100), new Vector2(180, 50));
-            AddButton(panel, "CancelButton", "CANCEL",
-                new Vector2(110, -100), new Vector2(180, 50));
-        }
-
-        private static void BuildRewardPopup(GameObject root)
-        {
-            AddBackground(root, new Color(0f, 0f, 0f, 0.75f));
-            var panel = new GameObject("Panel");
-            panel.transform.SetParent(root.transform, false);
-            var prt = panel.AddComponent<RectTransform>();
-            prt.anchoredPosition = Vector2.zero;
-            prt.sizeDelta = new Vector2(600, 500);
-            var pimg = panel.AddComponent<Image>();
-            pimg.color = new Color(0.1f, 0.15f, 0.25f, 1f);
-
-            AddText(panel, "TitleText", "REWARD!", 48, TextAlignmentOptions.Center,
-                new Vector2(0, 170), new Vector2(500, 60));
-
-            // Content container for reward entries
-            var content = new GameObject("RewardContainer");
-            content.transform.SetParent(panel.transform, false);
-            var crt = content.AddComponent<RectTransform>();
-            crt.anchoredPosition = new Vector2(0, 20);
-            crt.sizeDelta = new Vector2(400, 200);
-
-            AddButton(panel, "CollectButton", "COLLECT",
-                new Vector2(0, -160), new Vector2(300, 60));
-        }
-
-        // ─── Shared builder helpers ─────────────────────────────────────
-
-        private static void CreateScreenPrefab(string name, System.Action<GameObject> build)
-        {
-            string assetPath = $"{UI_DIR}/{name}.prefab";
-            if (AssetDatabase.LoadAssetAtPath<GameObject>(assetPath) != null) return;
-
-            var go = new GameObject(name);
-            var rt = go.AddComponent<RectTransform>();
-            rt.anchorMin = Vector2.zero;
-            rt.anchorMax = Vector2.one;
-            rt.offsetMin = Vector2.zero;
-            rt.offsetMax = Vector2.zero;
-
-            build(go);
-
-            PrefabUtility.SaveAsPrefabAsset(go, assetPath);
-            Object.DestroyImmediate(go);
-        }
-
-        private static void AddBackground(GameObject parent, Color color)
-        {
-            var bg = new GameObject("Background");
-            bg.transform.SetParent(parent.transform, false);
-            var rt = bg.AddComponent<RectTransform>();
-            rt.anchorMin = Vector2.zero;
-            rt.anchorMax = Vector2.one;
-            rt.offsetMin = Vector2.zero;
-            rt.offsetMax = Vector2.zero;
-            var img = bg.AddComponent<Image>();
-            img.color = color;
-            img.raycastTarget = true;
-        }
-
-        private static TextMeshProUGUI AddText(GameObject parent, string name, string text,
-            int fontSize, TextAlignmentOptions align, Vector2 pos, Vector2 size)
-        {
-            var go = new GameObject(name);
-            go.transform.SetParent(parent.transform, false);
-            var rt = go.AddComponent<RectTransform>();
-            rt.anchoredPosition = pos;
-            rt.sizeDelta = size;
-            var tmp = go.AddComponent<TextMeshProUGUI>();
-            tmp.text = text;
-            tmp.fontSize = fontSize;
-            tmp.alignment = align;
-            tmp.color = Color.white;
-            return tmp;
-        }
-
-        private static Button AddButton(GameObject parent, string name, string label,
-            Vector2 pos, Vector2 size)
-        {
-            var go = new GameObject(name);
-            go.transform.SetParent(parent.transform, false);
-            var rt = go.AddComponent<RectTransform>();
-            rt.anchoredPosition = pos;
-            rt.sizeDelta = size;
-            var img = go.AddComponent<Image>();
-            img.color = new Color(0.2f, 0.6f, 1f, 1f);
-            var btn = go.AddComponent<Button>();
-            btn.targetGraphic = img;
-
-            // Button label
-            AddText(go, "Label", label, 24, TextAlignmentOptions.Center, Vector2.zero, size);
-            return btn;
-        }
-
-        private static Toggle AddToggle(GameObject parent, string name, bool defaultOn, Vector2 pos)
-        {
-            var go = new GameObject(name);
-            go.transform.SetParent(parent.transform, false);
-            var rt = go.AddComponent<RectTransform>();
-            rt.anchoredPosition = pos;
-            rt.sizeDelta = new Vector2(60, 40);
-
-            var bg = new GameObject("Background");
-            bg.transform.SetParent(go.transform, false);
-            var bgRt = bg.AddComponent<RectTransform>();
-            bgRt.sizeDelta = new Vector2(60, 40);
-            var bgImg = bg.AddComponent<Image>();
-            bgImg.color = new Color(0.3f, 0.3f, 0.3f, 1f);
-
-            var checkmark = new GameObject("Checkmark");
-            checkmark.transform.SetParent(bg.transform, false);
-            var cmRt = checkmark.AddComponent<RectTransform>();
-            cmRt.sizeDelta = new Vector2(40, 30);
-            var cmImg = checkmark.AddComponent<Image>();
-            cmImg.color = new Color(0.2f, 0.8f, 0.4f, 1f);
-
-            var toggle = go.AddComponent<Toggle>();
-            toggle.targetGraphic = bgImg;
-            toggle.graphic = cmImg;
-            toggle.isOn = defaultOn;
-
-            return toggle;
-        }
+            GameType.HyperCasual => "HyperCasual",
+            GameType.Puzzle      => "Puzzle",
+            GameType.Racing      => "Racing",
+            GameType.Endless     => "Endless",
+            GameType.Hybrid      => "Hybrid",
+            _                    => "HyperCasual"
+        };
 
         private static void EnsureDir(string path)
         {
@@ -292,8 +65,7 @@ namespace ProtoCasual.Editor
             {
                 var parent = System.IO.Path.GetDirectoryName(path).Replace("\\", "/");
                 var folder = System.IO.Path.GetFileName(path);
-                if (!AssetDatabase.IsValidFolder(parent))
-                    EnsureDir(parent);
+                if (!AssetDatabase.IsValidFolder(parent)) EnsureDir(parent);
                 AssetDatabase.CreateFolder(parent, folder);
             }
         }

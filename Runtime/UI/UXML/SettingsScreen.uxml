@@ -1,0 +1,48 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="settings-screen" class="screen settings-screen">
+        <!-- Header -->
+        <ui:VisualElement class="screen-header">
+            <ui:Label text="SETTINGS" class="header-title" />
+            <ui:Button name="close-btn" text="✕" class="btn btn-close" />
+        </ui:VisualElement>
+
+        <!-- Body -->
+        <ui:VisualElement class="settings-body">
+            <!-- Audio Group -->
+            <ui:VisualElement class="settings-group">
+                <ui:Label text="Audio" class="group-title" />
+                <ui:VisualElement class="setting-row">
+                    <ui:Label text="Music" class="setting-label" />
+                    <ui:Toggle name="music-toggle" value="true" class="setting-toggle" />
+                </ui:VisualElement>
+                <ui:VisualElement class="setting-row">
+                    <ui:Label text="Music Volume" class="setting-label" />
+                    <ui:Slider name="music-volume" low-value="0" high-value="1" value="0.5" class="setting-slider" />
+                </ui:VisualElement>
+                <ui:VisualElement class="setting-row">
+                    <ui:Label text="SFX" class="setting-label" />
+                    <ui:Toggle name="sfx-toggle" value="true" class="setting-toggle" />
+                </ui:VisualElement>
+                <ui:VisualElement class="setting-row">
+                    <ui:Label text="SFX Volume" class="setting-label" />
+                    <ui:Slider name="sfx-volume" low-value="0" high-value="1" value="1" class="setting-slider" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Feedback Group -->
+            <ui:VisualElement class="settings-group">
+                <ui:Label text="Feedback" class="group-title" />
+                <ui:VisualElement class="setting-row">
+                    <ui:Label text="Vibration" class="setting-label" />
+                    <ui:Toggle name="vibration-toggle" value="true" class="setting-toggle" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Data Group -->
+            <ui:VisualElement class="settings-group">
+                <ui:Label text="Data" class="group-title" />
+                <ui:Button name="reset-data-btn" text="RESET ALL DATA" class="btn btn-danger" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

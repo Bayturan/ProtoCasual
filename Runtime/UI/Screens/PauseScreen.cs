@@ -1,51 +1,36 @@
-using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.UIElements;
 using ProtoCasual.Core.Managers;
-using ProtoCasual.Core.GameLoop;
 
-namespace ProtoCasual.Core.UI
+namespace ProtoCasual.Core.UI.Screens
 {
-    public class PauseScreen : UIScreen
+    /// <summary>Pause overlay — resume, restart, quit to menu.</summary>
+    public class PauseScreen : ScreenController
     {
-        [Header("Buttons")]
-        [SerializeField] private Button resumeButton;
-        [SerializeField] private Button restartButton;
-        [SerializeField] private Button menuButton;
+        public override string ScreenName => "PauseScreen";
 
-        protected override void OnInitialize()
+        protected override void OnBind()
         {
-            if (resumeButton != null)
-            {
-                resumeButton.onClick.AddListener(OnResumeClicked);
-            }
-
-            if (restartButton != null)
-            {
-                restartButton.onClick.AddListener(OnRestartClicked);
-            }
-
-            if (menuButton != null)
-            {
-                menuButton.onClick.AddListener(OnMenuClicked);
-            }
+            Btn("resume-btn")?.RegisterCallback<ClickEvent>(OnResumeClicked);
+            Btn("restart-btn")?.RegisterCallback<ClickEvent>(OnRestartClicked);
+            Btn("menu-btn")?.RegisterCallback<ClickEvent>(OnMenuClicked);
         }
 
-        private void OnResumeClicked()
+        private void OnResumeClicked(ClickEvent evt)
         {
             AudioManager.Instance?.PlayButtonClick();
-            GameManager.Instance.Resume();
+            GameManager.Instance?.Resume();
         }
 
-        private void OnRestartClicked()
+        private void OnRestartClicked(ClickEvent evt)
         {
             AudioManager.Instance?.PlayButtonClick();
-            GameManager.Instance.Restart();
+            GameManager.Instance?.Restart();
         }
 
-        private void OnMenuClicked()
+        private void OnMenuClicked(ClickEvent evt)
         {
             AudioManager.Instance?.PlayButtonClick();
-            GameManager.Instance.ReturnToMenu();
+            GameManager.Instance?.ReturnToMenu();
         }
     }
 }

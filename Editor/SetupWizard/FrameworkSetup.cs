@@ -238,7 +238,7 @@ namespace ProtoCasual.Editor
             int uiCount = CountUIPrefabs(config);
             DrawSummaryLine("Scenes", "2 (Main + InGame)");
             DrawSummaryLine("Config Assets", configCount.ToString());
-            DrawSummaryLine("UI Prefabs", uiCount.ToString());
+            DrawSummaryLine("UI Assets", uiCount.ToString());
             DrawSummaryLine("Game Events", "8");
 
             EditorGUILayout.Space(12);
@@ -339,13 +339,15 @@ namespace ProtoCasual.Editor
                 $"Project \"{cfg.gameName}\" is ready!\n\n" +
                 "• All configs created and wired to FrameworkConfig\n" +
                 "• GameBootstrap has FrameworkConfig assigned\n" +
-                "• UIManager screens are auto-wired\n" +
-                "• 8 GameEvent assets created\n\n" +
+                "• UIToolkitManager UXML/USS auto-wired\n" +
+                "• 8 GameEvent assets created\n" +
+                "• Theme USS copied to _Game/UI/Themes/ for customisation\n\n" +
                 "Next steps:\n" +
                 "1. Add your GameMode script under GameModes\n" +
                 "2. Add game mechanics and art\n" +
-                "3. Customize configs in _Game/ScriptableObjects\n" +
-                "4. Press Play!",
+                "3. Edit _Game/UI/Themes/GameTheme.uss to reskin UI\n" +
+                "4. Customize configs in _Game/ScriptableObjects\n" +
+                "5. Press Play!",
                 "OK");
         }
 
@@ -391,10 +393,11 @@ namespace ProtoCasual.Editor
 
         private static int CountUIPrefabs(GameSetupConfig cfg)
         {
-            // MenuScreen, SettingsScreen, GameplayScreen, PauseScreen, WinScreen, LoseScreen = 6
-            int count = 6;
-            if (cfg.store == StoreOption.Enabled) count += 2; // StoreScreen, InventoryScreen
-            if (cfg.enablePopups) count += 2; // ConfirmPopup, RewardPopup
+            // MainScreen, SettingsScreen, GameplayScreen, PauseScreen, WinScreen, LoseScreen = 6 UXML
+            // + Base USS + Components USS + Theme USS = 3 stylesheets
+            int count = 9;
+            if (cfg.store == StoreOption.Enabled) count += 2; // StoreScreen, InventoryScreen UXML
+            if (cfg.enablePopups) count += 2; // ConfirmPopup, RewardPopup UXML
             return count;
         }
     }

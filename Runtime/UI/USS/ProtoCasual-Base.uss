@@ -1,0 +1,336 @@
+/* ═══════════════════════════════════════════════════════════
+   ProtoCasual — Base Styles
+   Override CSS variables in theme USS files to reskin.
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+    --color-bg: #1a1a2e;
+    --color-surface: #16213e;
+    --color-primary: #3498db;
+    --color-secondary: #2ecc71;
+    --color-accent: #e94560;
+    --color-text: #ffffff;
+    --color-text-secondary: #aab2bd;
+    --color-success: #27ae60;
+    --color-danger: #e74c3c;
+    --color-warning: #f39c12;
+    --color-overlay: rgba(0, 0, 0, 0.75);
+    --border-radius: 12px;
+    --border-radius-sm: 8px;
+    --border-radius-lg: 16px;
+}
+
+/* ─── Screen ─────────────────────────────────────────────── */
+
+.screen {
+    flex-grow: 1;
+    background-color: var(--color-bg);
+    padding: 24px;
+    justify-content: space-between;
+    align-items: stretch;
+}
+
+.screen-container {
+    flex-grow: 1;
+}
+
+.screen-center {
+    flex-grow: 1;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ─── Typography ─────────────────────────────────────────── */
+
+.title-text {
+    font-size: 48px;
+    color: var(--color-text);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-bottom: 8px;
+}
+
+.subtitle-text {
+    font-size: 20px;
+    color: var(--color-text-secondary);
+    -unity-text-align: middle-center;
+}
+
+.header-title {
+    font-size: 36px;
+    color: var(--color-text);
+    -unity-font-style: bold;
+}
+
+.panel-title {
+    font-size: 42px;
+    color: var(--color-text);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-bottom: 24px;
+}
+
+.group-title {
+    font-size: 22px;
+    color: var(--color-primary);
+    -unity-font-style: bold;
+    margin-bottom: 12px;
+    padding-bottom: 4px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ─── Buttons ────────────────────────────────────────────── */
+
+.btn {
+    padding: 12px 32px;
+    border-radius: var(--border-radius);
+    border-width: 0;
+    font-size: 20px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    color: var(--color-text);
+    transition-duration: 0.15s;
+}
+
+.btn:hover {
+    scale: 1.04;
+}
+
+.btn:active {
+    scale: 0.96;
+}
+
+.btn-primary {
+    background-color: var(--color-primary);
+}
+
+.btn-secondary {
+    background-color: var(--color-surface);
+    border-width: 2px;
+    border-color: var(--color-primary);
+}
+
+.btn-tertiary {
+    background-color: transparent;
+    color: var(--color-text-secondary);
+}
+
+.btn-accent {
+    background-color: var(--color-accent);
+}
+
+.btn-danger {
+    background-color: var(--color-danger);
+}
+
+.btn-lg {
+    padding: 18px 48px;
+    font-size: 26px;
+    border-radius: var(--border-radius-lg);
+}
+
+.btn-icon {
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    font-size: 24px;
+    border-radius: 24px;
+    background-color: var(--color-surface);
+}
+
+.btn-close {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    font-size: 20px;
+    border-radius: 20px;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.btn:disabled {
+    opacity: 0.4;
+}
+
+/* ─── Layouts ────────────────────────────────────────────── */
+
+.button-column {
+    align-items: center;
+    padding: 16px 0;
+}
+
+.button-column > .btn {
+    margin-bottom: 12px;
+    width: 280px;
+}
+
+.button-row {
+    flex-direction: row;
+    justify-content: center;
+}
+
+.button-row > .btn {
+    margin: 0 6px;
+    flex-grow: 1;
+}
+
+/* ─── Screen Header ──────────────────────────────────────── */
+
+.screen-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 16px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+    margin-bottom: 16px;
+}
+
+/* ─── HUD ────────────────────────────────────────────────── */
+
+.hud-top {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.hud-bottom {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 8px;
+}
+
+.hud-spacer {
+    flex-grow: 1;
+}
+
+.hud-text {
+    font-size: 22px;
+    color: var(--color-text);
+    -unity-font-style: bold;
+}
+
+.hud-center {
+    -unity-text-align: middle-center;
+}
+
+/* ─── Currency Bar ───────────────────────────────────────── */
+
+.currency-bar {
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.currency-item {
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--color-surface);
+    border-radius: var(--border-radius-sm);
+    padding: 6px 12px;
+    margin-left: 8px;
+}
+
+.currency-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 12px;
+    margin-right: 8px;
+}
+
+.coin-icon {
+    background-color: var(--color-warning);
+}
+
+.gem-icon {
+    background-color: var(--color-accent);
+}
+
+.currency-text {
+    font-size: 18px;
+    color: var(--color-text);
+    -unity-font-style: bold;
+}
+
+/* ─── Overlay ────────────────────────────────────────────── */
+
+.overlay-bg {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: var(--color-overlay);
+}
+
+.overlay-screen {
+    position: relative;
+}
+
+.overlay-panel {
+    align-self: center;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--color-surface);
+    border-radius: var(--border-radius-lg);
+    padding: 32px;
+    margin-top: auto;
+    margin-bottom: auto;
+    min-width: 320px;
+}
+
+/* ─── Result Screens ─────────────────────────────────────── */
+
+.result-screen {
+    position: relative;
+    justify-content: center;
+    align-items: center;
+}
+
+.result-panel {
+    align-items: center;
+    background-color: var(--color-surface);
+    border-radius: var(--border-radius-lg);
+    padding: 40px;
+    min-width: 350px;
+}
+
+.result-title {
+    font-size: 48px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-bottom: 20px;
+}
+
+.win-title { color: var(--color-success); }
+.lose-title { color: var(--color-danger); }
+
+.result-stats {
+    margin-bottom: 24px;
+    align-items: center;
+}
+
+.stat-text {
+    font-size: 22px;
+    color: var(--color-text-secondary);
+    margin-bottom: 4px;
+}
+
+/* ─── Progress Bar ───────────────────────────────────────── */
+
+.progress-bar {
+    flex-grow: 1;
+    max-width: 200px;
+    height: 16px;
+}
+
+.progress-bar .unity-progress-bar__background {
+    background-color: var(--color-surface);
+    border-radius: 8px;
+}
+
+.progress-bar .unity-progress-bar__progress {
+    background-color: var(--color-primary);
+    border-radius: 8px;
+}

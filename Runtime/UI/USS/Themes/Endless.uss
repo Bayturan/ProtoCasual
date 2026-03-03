@@ -1,0 +1,19 @@
+/* ProtoCasual Theme — Endless Runner
+   Deep space gradients, retro-warm neon accents. */
+
+:root {
+    --color-bg: #0f0c29;
+    --color-surface: #302b63;
+    --color-primary: #24c6dc;
+    --color-secondary: #514a9d;
+    --color-accent: #f5af19;
+    --color-text: #eaeaea;
+    --color-text-secondary: #a8a5c5;
+    --color-success: #24c6dc;
+    --color-danger: #eb4d4b;
+    --color-warning: #f5af19;
+    --color-overlay: rgba(15, 12, 41, 0.85);
+    --border-radius: 10px;
+    --border-radius-sm: 6px;
+    --border-radius-lg: 14px;
+}

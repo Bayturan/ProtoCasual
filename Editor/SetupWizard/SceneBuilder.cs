@@ -1,6 +1,5 @@
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
+using UnityEngine.UIElements;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using ProtoCasual.Core.Bootstrap;
@@ -12,19 +11,17 @@ using ProtoCasual.Core.UI;
 namespace ProtoCasual.Editor
 {
     /// <summary>
-    /// Creates the Main (menu) and InGame scenes with full hierarchy, components,
-    /// auto-wired FrameworkConfig on GameBootstrap, and auto-wired UIManager screens.
+    /// Creates Main (menu) and InGame scenes with full hierarchy,
+    /// UIDocument + UIToolkitManager with UXML/USS auto-wired from package.
     /// </summary>
     public static class SceneBuilder
     {
+        private const string PKG_UI = "Packages/com.bayturan.protocasual/Runtime/UI";
+
         // ═══════════════════════════════════════════════════════════════
         //  PUBLIC API
         // ═══════════════════════════════════════════════════════════════
 
-        /// <summary>
-        /// Builds both scenes. Receives FrameworkConfig from ProjectStructureGenerator
-        /// and auto-wires it to every GameBootstrap in each scene.
-        /// </summary>
         public static void BuildAll(GameSetupConfig cfg, FrameworkConfig frameworkConfig)
         {
             BuildMainScene(cfg, frameworkConfig);
@@ -34,7 +31,7 @@ namespace ProtoCasual.Editor
         }
 
         // ═══════════════════════════════════════════════════════════════
-        //  MAIN SCENE  (Menu)
+        //  MAIN SCENE
         // ═══════════════════════════════════════════════════════════════
 
         public static void BuildMainScene(GameSetupConfig cfg, FrameworkConfig frameworkConfig)
@@ -50,63 +47,31 @@ namespace ProtoCasual.Editor
 
             // ── Managers ──
             var managers = CreateGO("Managers");
+            CreateChild("GameManager", managers).AddComponent<GameManager>();
+            CreateChild("GameModeManager", managers).AddComponent<GameModeManager>();
+            CreateChild("AudioManager", managers).AddComponent<AudioManager>();
+            CreateChild("LevelManager", managers).AddComponent<LevelManager>();
+            CreateChild("SaveService", managers).AddComponent<SaveService>();
 
-            var gm = CreateChild("GameManager", managers);
-            gm.AddComponent<GameManager>();
-
-            var gmm = CreateChild("GameModeManager", managers);
-            gmm.AddComponent<GameModeManager>();
-
-            var audio = CreateChild("AudioManager", managers);
-            audio.AddComponent<AudioManager>();
-
-            var level = CreateChild("LevelManager", managers);
-            level.AddComponent<LevelManager>();
-
-            var save = CreateChild("SaveService", managers);
-            save.AddComponent<SaveService>();
-
-            // Monetization managers
             if (cfg.monetization == MonetizationType.AdsOnly || cfg.monetization == MonetizationType.AdsPlusIAP)
                 CreateChild("AdsManager", managers);
             if (cfg.monetization == MonetizationType.IAPOnly || cfg.monetization == MonetizationType.AdsPlusIAP)
                 CreateChild("IAPManager", managers);
 
-            // Input
-            var inputGO = CreateChild("InputManager", managers);
-            inputGO.AddComponent<InputManager>();
+            CreateChild("InputManager", managers).AddComponent<InputManager>();
 
-            // ── GameModes container ──
+            // ── GameModes ──
             CreateGO("GameModes");
 
-            // ── Canvas (UI) ──
-            var canvasGO = CreateCanvas("Canvas");
-            var uiManager = canvasGO.AddComponent<UIManager>();
+            // ── UI (UI Toolkit) ──
+            var uiGO = CreateGO("UI");
+            var uiDoc = uiGO.AddComponent<UIDocument>();
+            var panelSettings = GetOrCreatePanelSettings();
+            uiDoc.panelSettings = panelSettings;
+            var uiManager = uiGO.AddComponent<UIToolkitManager>();
 
-            CreateScreenChild("MenuScreen", canvasGO, typeof(MenuScreen));
-            CreateScreenChild("SettingsScreen", canvasGO, typeof(SettingsScreen));
-            if (cfg.store == StoreOption.Enabled)
-            {
-                CreateScreenChild("StoreScreen", canvasGO, typeof(StoreScreen));
-                CreateScreenChild("InventoryScreen", canvasGO, typeof(InventoryScreen));
-            }
-
-            // ── Popup Canvas (higher sort order) ──
-            if (cfg.enablePopups)
-            {
-                var popupCanvas = CreateCanvas("PopupCanvas");
-                popupCanvas.GetComponent<Canvas>().sortingOrder = 200;
-                popupCanvas.AddComponent<PopupManager>();
-                CreateScreenChild("ConfirmPopup", popupCanvas, typeof(ConfirmPopup));
-                CreateScreenChild("RewardPopup", popupCanvas, typeof(RewardPopup));
-            }
-
-            // ── EventSystem ──
-            EnsureEventSystem();
-
-            // ── Auto-wire ──
+            WireUIToolkitManager(uiManager, cfg);
             WireFrameworkConfig(bootstrap, frameworkConfig);
-            WireUIManagerScreens(uiManager);
 
             // ── Save ──
             EnsureDir("Assets/Scenes");
@@ -131,98 +96,62 @@ namespace ProtoCasual.Editor
 
             // ── GameWorld ──
             var gameWorld = CreateGO("GameWorld");
-
-            // Player spawn point
             var spawnPoint = CreateChild("PlayerSpawnPoint", gameWorld);
             spawnPoint.transform.position = new Vector3(0, 1, 0);
 
-            // Game-type specifics
             switch (cfg.gameType)
             {
                 case GameType.Racing:
                     CreateChild("TrackGenerator", gameWorld);
-                    if (cfg.bots != BotOption.None)
-                        CreateChild("BotSpawner", gameWorld);
+                    if (cfg.bots != BotOption.None) CreateChild("BotSpawner", gameWorld);
                     break;
-
                 case GameType.Puzzle:
                     CreateChild("GridSystem", gameWorld);
                     CreateChild("MatchLogic", gameWorld);
                     break;
-
                 case GameType.Endless:
-                    var endlessGen = CreateChild("EndlessGenerator", gameWorld);
-                    endlessGen.AddComponent<EndlessGenerator>();
+                    CreateChild("EndlessGenerator", gameWorld).AddComponent<EndlessGenerator>();
                     break;
-
                 case GameType.HyperCasual:
                     CreateChild("LevelLoader", gameWorld);
                     break;
-
                 case GameType.Hybrid:
                     CreateChild("LevelLoader", gameWorld);
                     if (cfg.mapType == MapType.Procedural || cfg.mapType == MapType.EndlessGeneration)
-                    {
-                        var mapGen = CreateChild("MapGenerator", gameWorld);
-                        mapGen.AddComponent<MapGenerator>();
-                    }
+                        CreateChild("MapGenerator", gameWorld).AddComponent<MapGenerator>();
                     break;
             }
 
-            // Procedural map generator
-            if (cfg.mapType == MapType.Procedural || cfg.mapType == MapType.EndlessGeneration)
+            if ((cfg.mapType == MapType.Procedural || cfg.mapType == MapType.EndlessGeneration)
+                && gameWorld.transform.Find("MapGenerator") == null
+                && gameWorld.transform.Find("EndlessGenerator") == null)
             {
-                if (gameWorld.transform.Find("MapGenerator") == null &&
-                    gameWorld.transform.Find("EndlessGenerator") == null)
-                {
-                    var mg = CreateChild("MapGenerator", gameWorld);
-                    mg.AddComponent<MapGenerator>();
-                }
+                CreateChild("MapGenerator", gameWorld).AddComponent<MapGenerator>();
             }
 
-            // Bots
             if (cfg.bots != BotOption.None && gameWorld.transform.Find("BotSpawner") == null)
                 CreateChild("BotSpawner", gameWorld);
 
             // ── Managers ──
             var managers = CreateGO("Managers");
+            CreateChild("GameManager", managers).AddComponent<GameManager>();
+            CreateChild("GameModeManager", managers).AddComponent<GameModeManager>();
+            CreateChild("AudioManager", managers).AddComponent<AudioManager>();
+            CreateChild("LevelManager", managers).AddComponent<LevelManager>();
+            CreateChild("SaveService", managers).AddComponent<SaveService>();
+            CreateChild("InputManager", managers).AddComponent<InputManager>();
 
-            var gm = CreateChild("GameManager", managers);
-            gm.AddComponent<GameManager>();
-
-            var gmm = CreateChild("GameModeManager", managers);
-            gmm.AddComponent<GameModeManager>();
-
-            var audioGO = CreateChild("AudioManager", managers);
-            audioGO.AddComponent<AudioManager>();
-
-            var levelGO = CreateChild("LevelManager", managers);
-            levelGO.AddComponent<LevelManager>();
-
-            var saveGO = CreateChild("SaveService", managers);
-            saveGO.AddComponent<SaveService>();
-
-            var inputGO = CreateChild("InputManager", managers);
-            inputGO.AddComponent<InputManager>();
-
-            // ── GameModes container ──
+            // ── GameModes ──
             CreateGO("GameModes");
 
-            // ── Canvas (UI) ──
-            var canvasGO = CreateCanvas("Canvas");
-            var uiManager = canvasGO.AddComponent<UIManager>();
+            // ── UI (UI Toolkit) ──
+            var uiGO = CreateGO("UI");
+            var uiDoc = uiGO.AddComponent<UIDocument>();
+            uiDoc.panelSettings = GetOrCreatePanelSettings();
+            var uiManager = uiGO.AddComponent<UIToolkitManager>();
 
-            CreateScreenChild("GameplayScreen", canvasGO, typeof(GameplayScreen));
-            CreateScreenChild("PauseScreen", canvasGO, typeof(PauseScreen));
-            CreateScreenChild("WinScreen", canvasGO, typeof(WinScreen));
-            CreateScreenChild("LoseScreen", canvasGO, typeof(LoseScreen));
-
-            // ── EventSystem ──
-            EnsureEventSystem();
-
-            // ── Auto-wire ──
+            WireUIToolkitManager(uiManager, cfg);
             WireFrameworkConfig(bootstrap, frameworkConfig);
-            WireUIManagerScreens(uiManager);
 
             // ── Save ──
             EnsureDir("Assets/Scenes");
@@ -234,13 +163,52 @@ namespace ProtoCasual.Editor
         //  AUTO-WIRING
         // ═══════════════════════════════════════════════════════════════
 
-        /// <summary>
-        /// Assigns FrameworkConfig to GameBootstrap's serialized field using SerializedObject API.
-        /// </summary>
+        private static void WireUIToolkitManager(UIToolkitManager manager, GameSetupConfig cfg)
+        {
+            var so = new SerializedObject(manager);
+
+            // Screens
+            SetAsset<VisualTreeAsset>(so, "mainScreenLayout",      $"{PKG_UI}/UXML/MainScreen.uxml");
+            SetAsset<VisualTreeAsset>(so, "gameplayScreenLayout",   $"{PKG_UI}/UXML/GameplayScreen.uxml");
+            SetAsset<VisualTreeAsset>(so, "winScreenLayout",        $"{PKG_UI}/UXML/WinScreen.uxml");
+            SetAsset<VisualTreeAsset>(so, "loseScreenLayout",       $"{PKG_UI}/UXML/LoseScreen.uxml");
+            SetAsset<VisualTreeAsset>(so, "pauseScreenLayout",      $"{PKG_UI}/UXML/PauseScreen.uxml");
+            SetAsset<VisualTreeAsset>(so, "settingsScreenLayout",   $"{PKG_UI}/UXML/SettingsScreen.uxml");
+
+            if (cfg.store == StoreOption.Enabled)
+            {
+                SetAsset<VisualTreeAsset>(so, "storeScreenLayout",     $"{PKG_UI}/UXML/StoreScreen.uxml");
+                SetAsset<VisualTreeAsset>(so, "inventoryScreenLayout",  $"{PKG_UI}/UXML/InventoryScreen.uxml");
+            }
+
+            // Popups
+            if (cfg.enablePopups)
+            {
+                SetAsset<VisualTreeAsset>(so, "confirmPopupLayout", $"{PKG_UI}/UXML/ConfirmPopup.uxml");
+                SetAsset<VisualTreeAsset>(so, "rewardPopupLayout",  $"{PKG_UI}/UXML/RewardPopup.uxml");
+            }
+
+            // Styles
+            SetAsset<StyleSheet>(so, "baseStyles",      $"{PKG_UI}/USS/ProtoCasual-Base.uss");
+            SetAsset<StyleSheet>(so, "componentStyles",  $"{PKG_UI}/USS/ProtoCasual-Components.uss");
+
+            // Theme (prefer project copy, fallback to package)
+            string themeSrc = GetThemeFileName(cfg.gameType);
+            string projectTheme = "Assets/_Game/UI/Themes/GameTheme.uss";
+            string packageTheme = $"{PKG_UI}/USS/Themes/{themeSrc}.uss";
+
+            var themeAsset = AssetDatabase.LoadAssetAtPath<StyleSheet>(projectTheme)
+                          ?? AssetDatabase.LoadAssetAtPath<StyleSheet>(packageTheme);
+            var themeProp = so.FindProperty("themeStyles");
+            if (themeProp != null) themeProp.objectReferenceValue = themeAsset;
+
+            so.ApplyModifiedPropertiesWithoutUndo();
+            Debug.Log("[ProtoCasual] UIToolkitManager auto-wired (UXML + USS).");
+        }
+
         private static void WireFrameworkConfig(GameBootstrap bootstrap, FrameworkConfig config)
         {
             if (bootstrap == null || config == null) return;
-
             var so = new SerializedObject(bootstrap);
             var prop = so.FindProperty("frameworkConfig");
             if (prop != null)
@@ -249,34 +217,27 @@ namespace ProtoCasual.Editor
                 so.ApplyModifiedPropertiesWithoutUndo();
                 Debug.Log("[ProtoCasual] FrameworkConfig auto-wired to GameBootstrap.");
             }
-            else
-            {
-                Debug.LogWarning("[ProtoCasual] Could not find 'frameworkConfig' field on GameBootstrap.");
-            }
         }
 
-        /// <summary>
-        /// Auto-discovers UIScreen children and assigns them to UIManager's screens array.
-        /// </summary>
-        private static void WireUIManagerScreens(UIManager uiManager)
+        // ═══════════════════════════════════════════════════════════════
+        //  PANEL SETTINGS
+        // ═══════════════════════════════════════════════════════════════
+
+        private static PanelSettings GetOrCreatePanelSettings()
         {
-            if (uiManager == null) return;
+            string path = "Assets/_Game/UI/GamePanelSettings.asset";
+            var existing = AssetDatabase.LoadAssetAtPath<PanelSettings>(path);
+            if (existing != null) return existing;
 
-            var screens = uiManager.GetComponentsInChildren<UIScreen>(true);
-            if (screens.Length == 0) return;
-
-            var so = new SerializedObject(uiManager);
-            var prop = so.FindProperty("screens");
-            if (prop != null && prop.isArray)
-            {
-                prop.arraySize = screens.Length;
-                for (int i = 0; i < screens.Length; i++)
-                {
-                    prop.GetArrayElementAtIndex(i).objectReferenceValue = screens[i];
-                }
-                so.ApplyModifiedPropertiesWithoutUndo();
-                Debug.Log($"[ProtoCasual] UIManager: {screens.Length} screens auto-wired.");
-            }
+            EnsureDir("Assets/_Game/UI");
+            var ps = ScriptableObject.CreateInstance<PanelSettings>();
+            ps.scaleMode = PanelScaleMode.ScaleWithScreenSize;
+            ps.referenceResolution = new Vector2Int(1080, 1920);
+            ps.screenMatchMode = PanelScreenMatchMode.MatchWidthOrHeight;
+            ps.match = 0.5f;
+            AssetDatabase.CreateAsset(ps, path);
+            Debug.Log("[ProtoCasual] PanelSettings created for mobile scaling.");
+            return ps;
         }
 
         // ═══════════════════════════════════════════════════════════════
@@ -286,18 +247,14 @@ namespace ProtoCasual.Editor
         public static void AddScenesToBuildSettings()
         {
             var scenes = new System.Collections.Generic.List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
-
             TryAddScene(scenes, "Assets/Scenes/Main.unity");
             TryAddScene(scenes, "Assets/Scenes/InGame.unity");
-
             EditorBuildSettings.scenes = scenes.ToArray();
         }
 
         private static void TryAddScene(System.Collections.Generic.List<EditorBuildSettingsScene> scenes, string path)
         {
-            foreach (var s in scenes)
-                if (s.path == path) return;
-
+            foreach (var s in scenes) if (s.path == path) return;
             if (System.IO.File.Exists(path))
                 scenes.Add(new EditorBuildSettingsScene(path, true));
         }
@@ -305,6 +262,23 @@ namespace ProtoCasual.Editor
         // ═══════════════════════════════════════════════════════════════
         //  HELPERS
         // ═══════════════════════════════════════════════════════════════
+
+        private static string GetThemeFileName(GameType type) => type switch
+        {
+            GameType.HyperCasual => "HyperCasual",
+            GameType.Puzzle      => "Puzzle",
+            GameType.Racing      => "Racing",
+            GameType.Endless     => "Endless",
+            GameType.Hybrid      => "Hybrid",
+            _                    => "HyperCasual"
+        };
+
+        private static void SetAsset<T>(SerializedObject so, string propName, string assetPath) where T : Object
+        {
+            var prop = so.FindProperty(propName);
+            if (prop != null)
+                prop.objectReferenceValue = AssetDatabase.LoadAssetAtPath<T>(assetPath);
+        }
 
         private static bool SceneExistsAndSkip(string path)
         {
@@ -316,11 +290,7 @@ namespace ProtoCasual.Editor
             return false;
         }
 
-        private static GameObject CreateGO(string name)
-        {
-            var go = new GameObject(name);
-            return go;
-        }
+        private static GameObject CreateGO(string name) => new GameObject(name);
 
         private static GameObject CreateChild(string name, GameObject parent)
         {
@@ -329,60 +299,13 @@ namespace ProtoCasual.Editor
             return go;
         }
 
-        private static GameObject CreateCanvas(string name)
-        {
-            var go = new GameObject(name);
-
-            var canvas = go.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 100;
-
-            var scaler = go.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1080, 1920);
-            scaler.matchWidthOrHeight = 0.5f;
-
-            go.AddComponent<GraphicRaycaster>();
-            return go;
-        }
-
-        private static void CreateScreenChild(string name, GameObject canvas, System.Type screenType)
-        {
-            var go = new GameObject(name);
-            go.transform.SetParent(canvas.transform, false);
-
-            var rt = go.AddComponent<RectTransform>();
-            rt.anchorMin = Vector2.zero;
-            rt.anchorMax = Vector2.one;
-            rt.offsetMin = Vector2.zero;
-            rt.offsetMax = Vector2.zero;
-
-            if (screenType != null && typeof(UIScreen).IsAssignableFrom(screenType))
-                go.AddComponent(screenType);
-            else
-                go.AddComponent<UIScreen>();
-
-            go.SetActive(false);
-        }
-
-        private static void EnsureEventSystem()
-        {
-            if (Object.FindAnyObjectByType<EventSystem>() == null)
-            {
-                var es = new GameObject("EventSystem");
-                es.AddComponent<EventSystem>();
-                es.AddComponent<StandaloneInputModule>();
-            }
-        }
-
         private static void EnsureDir(string path)
         {
             if (!AssetDatabase.IsValidFolder(path))
             {
                 var parent = System.IO.Path.GetDirectoryName(path).Replace("\\", "/");
                 var folder = System.IO.Path.GetFileName(path);
-                if (!AssetDatabase.IsValidFolder(parent))
-                    EnsureDir(parent);
+                if (!AssetDatabase.IsValidFolder(parent)) EnsureDir(parent);
                 AssetDatabase.CreateFolder(parent, folder);
             }
         }

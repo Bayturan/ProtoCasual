@@ -1,234 +1,163 @@
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+using UnityEngine.UIElements;
 using ProtoCasual.Core.Bootstrap;
 using ProtoCasual.Core.Interfaces;
-using ProtoCasual.Core.ScriptableObjects;
+using ProtoCasual.Core.Managers;
 using ProtoCasual.Core.Store;
 
-namespace ProtoCasual.Core.UI
+namespace ProtoCasual.Core.UI.Screens
 {
-    /// <summary>
-    /// Displays items from <see cref="ItemDatabase"/> and lets the player purchase
-    /// through <see cref="IStoreService"/>. Resolves services from ServiceLocator.
-    /// </summary>
-    public class StoreScreen : UIScreen
+    /// <summary>Store screen — browse items, purchase with soft/hard currency.</summary>
+    public class StoreScreen : ScreenController
     {
-        [Header("References")]
-        [SerializeField] private ItemDatabase itemDatabase;
+        public override string ScreenName => "StoreScreen";
 
-        [Header("Currency Display")]
-        [SerializeField] private TextMeshProUGUI softCurrencyText;
-        [SerializeField] private TextMeshProUGUI hardCurrencyText;
-
-        [Header("Item List")]
-        [SerializeField] private Transform itemContainer;
-        [SerializeField] private GameObject storeItemPrefab;
-
-        [Header("Detail Panel")]
-        [SerializeField] private GameObject detailPanel;
-        [SerializeField] private Image detailIcon;
-        [SerializeField] private TextMeshProUGUI detailName;
-        [SerializeField] private TextMeshProUGUI detailDescription;
-        [SerializeField] private TextMeshProUGUI detailPrice;
-        [SerializeField] private Button buySoftButton;
-        [SerializeField] private Button buyHardButton;
-
-        [Header("Navigation")]
-        [SerializeField] private Button closeButton;
-        [SerializeField] private TextMeshProUGUI feedbackText;
+        private Label softCurrencyLabel;
+        private Label hardCurrencyLabel;
+        private ScrollView itemList;
+        private VisualElement detailPanel;
+        private Label detailName;
+        private Label detailDescription;
+        private Label detailPrice;
+        private Button buySoftBtn;
+        private Button buyHardBtn;
+        private Label feedbackLabel;
 
         private IStoreService storeService;
         private ICurrencyService currencyService;
         private IInventoryService inventoryService;
-
-        private readonly List<GameObject> spawnedItems = new();
         private string selectedItemId;
 
-        // ─── Lifecycle ──────────────────────────────────────────────────
-
-        protected override void OnInitialize()
+        protected override void OnBind()
         {
-            // Try to get services; store features will be disabled if services aren't available
             ServiceLocator.TryGet<IStoreService>(out storeService);
             ServiceLocator.TryGet<ICurrencyService>(out currencyService);
             ServiceLocator.TryGet<IInventoryService>(out inventoryService);
 
-            if (closeButton != null)
-                closeButton.onClick.AddListener(OnCloseClicked);
+            Btn("close-btn")?.RegisterCallback<ClickEvent>(OnCloseClicked);
 
-            if (buySoftButton != null)
-                buySoftButton.onClick.AddListener(() => TryPurchase(false));
+            softCurrencyLabel = Lbl("soft-currency");
+            hardCurrencyLabel = Lbl("hard-currency");
+            itemList = SView("item-list");
+            detailPanel = Q("detail-panel");
+            detailName = Lbl("detail-name");
+            detailDescription = Lbl("detail-description");
+            detailPrice = Lbl("detail-price");
+            buySoftBtn = Btn("buy-soft-btn");
+            buyHardBtn = Btn("buy-hard-btn");
+            feedbackLabel = Lbl("feedback-text");
 
-            if (buyHardButton != null)
-                buyHardButton.onClick.AddListener(() => TryPurchase(true));
+            buySoftBtn?.RegisterCallback<ClickEvent>(_ => TryPurchase(false));
+            buyHardBtn?.RegisterCallback<ClickEvent>(_ => TryPurchase(true));
 
-            if (storeService != null)
-                storeService.OnPurchaseCompleted += HandlePurchaseCompleted;
-
-            if (currencyService != null)
-                currencyService.OnCurrencyChanged += RefreshCurrencyUI;
-
-            HideDetail();
+            if (storeService != null) storeService.OnPurchaseCompleted += HandlePurchase;
+            if (currencyService != null) currencyService.OnCurrencyChanged += RefreshCurrency;
         }
 
-        protected override void OnShow()
+        public override void OnShow()
         {
-            RefreshCurrencyUI();
+            RefreshCurrency();
             PopulateItems();
             HideDetail();
-            SetFeedback(string.Empty);
+            SetFeedback("");
         }
 
-        protected override void OnHide()
-        {
-            selectedItemId = null;
-        }
-
-        private void OnDestroy()
-        {
-            if (storeService != null)
-                storeService.OnPurchaseCompleted -= HandlePurchaseCompleted;
-
-            if (currencyService != null)
-                currencyService.OnCurrencyChanged -= RefreshCurrencyUI;
-        }
-
-        // ─── Item List ─────────────────────────────────────────────────
+        public override void OnHide() { selectedItemId = null; }
 
         private void PopulateItems()
         {
-            ClearSpawnedItems();
+            if (itemList == null) return;
+            itemList.Clear();
 
-            if (itemDatabase == null || storeItemPrefab == null || itemContainer == null)
-                return;
+            if (!ServiceLocator.TryGet<ItemDatabase>(out var db)) return;
 
-            foreach (var item in itemDatabase.All)
+            foreach (var item in db.All)
             {
                 if (item == null) continue;
 
-                var go = Instantiate(storeItemPrefab, itemContainer);
-                spawnedItems.Add(go);
+                var card = new VisualElement();
+                card.AddToClassList("store-item-card");
 
-                // Icon
-                var icon = go.GetComponentInChildren<Image>();
-                if (icon != null && item.Icon != null)
-                    icon.sprite = item.Icon;
+                var nameLabel = new Label(item.DisplayName);
+                nameLabel.AddToClassList("item-name");
+                card.Add(nameLabel);
 
-                // Name label
-                var label = go.GetComponentInChildren<TextMeshProUGUI>();
-                if (label != null)
-                    label.text = item.DisplayName;
+                string priceText = item.SoftCurrencyPrice > 0
+                    ? $"{item.SoftCurrencyPrice} Coins"
+                    : $"{item.HardCurrencyPrice} Gems";
+                var priceLbl = new Label(priceText);
+                priceLbl.AddToClassList("item-price");
+                card.Add(priceLbl);
 
-                // Owned badge — grey-out non-stackable items already owned
                 bool owned = !item.IsStackable && inventoryService != null && inventoryService.HasItem(item.Id);
-                if (owned)
-                {
-                    var cg = go.GetComponent<CanvasGroup>();
-                    if (cg == null) cg = go.AddComponent<CanvasGroup>();
-                    cg.alpha = 0.5f;
-                }
+                if (owned) card.AddToClassList("item-owned");
 
-                // Select button
                 string capturedId = item.Id;
-                var btn = go.GetComponent<Button>();
-                if (btn == null) btn = go.AddComponent<Button>();
-                btn.onClick.AddListener(() => SelectItem(capturedId));
+                card.RegisterCallback<ClickEvent>(_ => SelectItem(capturedId));
+                itemList.Add(card);
             }
         }
-
-        private void ClearSpawnedItems()
-        {
-            foreach (var go in spawnedItems)
-            {
-                if (go != null) Destroy(go);
-            }
-            spawnedItems.Clear();
-        }
-
-        // ─── Detail Panel ───────────────────────────────────────────────
 
         private void SelectItem(string itemId)
         {
             selectedItemId = itemId;
-            var item = itemDatabase.Get(itemId);
+            if (!ServiceLocator.TryGet<ItemDatabase>(out var db)) return;
+            var item = db.Get(itemId);
             if (item == null) return;
 
-            if (detailPanel != null) detailPanel.SetActive(true);
-            if (detailIcon != null) detailIcon.sprite = item.Icon;
+            if (detailPanel != null) detailPanel.style.display = DisplayStyle.Flex;
             if (detailName != null) detailName.text = item.DisplayName;
             if (detailDescription != null) detailDescription.text = item.Description;
-
-            // Price labels
             if (detailPrice != null)
             {
-                string price = item.SoftCurrencyPrice > 0
+                detailPrice.text = item.SoftCurrencyPrice > 0
                     ? $"{item.SoftCurrencyPrice} Coins"
                     : $"{item.HardCurrencyPrice} Gems";
-                detailPrice.text = price;
             }
 
-            // Button states
-            bool canBuy = storeService != null && storeService.CanPurchase(itemId);
-            if (buySoftButton != null)
-                buySoftButton.interactable = canBuy && item.SoftCurrencyPrice > 0;
-            if (buyHardButton != null)
-                buyHardButton.interactable = canBuy && item.HardCurrencyPrice > 0;
-
-            SetFeedback(string.Empty);
+            bool canBuy = storeService?.CanPurchase(itemId) ?? false;
+            if (buySoftBtn != null) buySoftBtn.SetEnabled(canBuy && item.SoftCurrencyPrice > 0);
+            if (buyHardBtn != null) buyHardBtn.SetEnabled(canBuy && item.HardCurrencyPrice > 0);
+            SetFeedback("");
         }
 
         private void HideDetail()
         {
-            if (detailPanel != null) detailPanel.SetActive(false);
+            if (detailPanel != null) detailPanel.style.display = DisplayStyle.None;
             selectedItemId = null;
         }
 
-        // ─── Purchase ───────────────────────────────────────────────────
-
         private void TryPurchase(bool preferHard)
         {
-            if (string.IsNullOrEmpty(selectedItemId) || storeService == null)
-                return;
-
-            bool success = storeService.TryPurchase(selectedItemId, preferHard);
-            if (!success)
-            {
+            if (string.IsNullOrEmpty(selectedItemId) || storeService == null) return;
+            if (!storeService.TryPurchase(selectedItemId, preferHard))
                 SetFeedback("Not enough currency!");
-            }
         }
 
-        private void HandlePurchaseCompleted(PurchaseResult result)
+        private void HandlePurchase(PurchaseResult result)
         {
             SetFeedback($"Purchased {result.ItemId}!");
-            RefreshCurrencyUI();
+            RefreshCurrency();
             PopulateItems();
-
-            // Re-select so detail panel updates button states
-            if (selectedItemId == result.ItemId)
-                SelectItem(selectedItemId);
+            if (selectedItemId == result.ItemId) SelectItem(selectedItemId);
         }
 
-        // ─── Currency Display ───────────────────────────────────────────
-
-        private void RefreshCurrencyUI()
+        private void RefreshCurrency()
         {
             if (currencyService == null) return;
-            if (softCurrencyText != null) softCurrencyText.text = currencyService.SoftCurrency.ToString();
-            if (hardCurrencyText != null) hardCurrencyText.text = currencyService.HardCurrency.ToString();
+            if (softCurrencyLabel != null) softCurrencyLabel.text = currencyService.SoftCurrency.ToString();
+            if (hardCurrencyLabel != null) hardCurrencyLabel.text = currencyService.HardCurrency.ToString();
         }
 
-        // ─── Helpers ────────────────────────────────────────────────────
-
-        private void SetFeedback(string message)
+        private void SetFeedback(string msg)
         {
-            if (feedbackText != null) feedbackText.text = message;
+            if (feedbackLabel != null) feedbackLabel.text = msg;
         }
 
-        private void OnCloseClicked()
+        private void OnCloseClicked(ClickEvent evt)
         {
-            UIManager.Instance.ShowScreen("MenuScreen");
+            AudioManager.Instance?.PlayButtonClick();
+            UIToolkitManager.Instance?.ShowScreen("MainScreen");
         }
     }
 }

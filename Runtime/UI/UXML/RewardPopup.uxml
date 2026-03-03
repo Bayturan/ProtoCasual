@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="reward-popup" class="popup-overlay">
+        <ui:VisualElement class="popup-backdrop" />
+        <ui:VisualElement class="popup-panel popup-md">
+            <ui:Label name="title-text" text="REWARD!" class="popup-title reward-title" />
+            <ui:VisualElement name="reward-container" class="reward-list" />
+            <ui:Button name="collect-btn" text="COLLECT" class="btn btn-primary btn-lg" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

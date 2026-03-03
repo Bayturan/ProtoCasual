@@ -31,6 +31,7 @@ namespace ProtoCasual.Editor
             CreateDir($"{root}/ScriptableObjects/Items");
             CreateDir($"{root}/ScriptableObjects/Rewards");
             CreateDir($"{root}/UI");
+            CreateDir($"{root}/UI/Themes");
             CreateDir($"{root}/Materials");
             CreateDir($"{root}/Audio");
             CreateDir($"{root}/Audio/Music");

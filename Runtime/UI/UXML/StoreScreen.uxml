@@ -1,0 +1,34 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="store-screen" class="screen shop-screen">
+        <!-- Header -->
+        <ui:VisualElement class="screen-header">
+            <ui:Label text="STORE" class="header-title" />
+            <ui:VisualElement class="currency-bar">
+                <ui:VisualElement class="currency-item">
+                    <ui:VisualElement class="currency-icon coin-icon" />
+                    <ui:Label name="soft-currency" text="0" class="currency-text" />
+                </ui:VisualElement>
+                <ui:VisualElement class="currency-item">
+                    <ui:VisualElement class="currency-icon gem-icon" />
+                    <ui:Label name="hard-currency" text="0" class="currency-text" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:Button name="close-btn" text="✕" class="btn btn-close" />
+        </ui:VisualElement>
+
+        <!-- Body -->
+        <ui:VisualElement class="shop-body">
+            <ui:ScrollView name="item-list" class="item-list" />
+            <ui:VisualElement name="detail-panel" class="detail-panel">
+                <ui:Label name="detail-name" text="" class="detail-name" />
+                <ui:Label name="detail-description" text="" class="detail-desc" />
+                <ui:Label name="detail-price" text="" class="detail-price" />
+                <ui:VisualElement class="button-row">
+                    <ui:Button name="buy-soft-btn" text="BUY (Coins)" class="btn btn-primary" />
+                    <ui:Button name="buy-hard-btn" text="BUY (Gems)" class="btn btn-accent" />
+                </ui:VisualElement>
+                <ui:Label name="feedback-text" text="" class="feedback-text" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

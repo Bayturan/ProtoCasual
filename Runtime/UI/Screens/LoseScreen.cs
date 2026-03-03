@@ -1,36 +1,24 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using ProtoCasual.Core.Managers;
-using ProtoCasual.Core.GameLoop;
+using UnityEngine.UIElements;
 using ProtoCasual.Core.Bootstrap;
 using ProtoCasual.Core.Interfaces;
+using ProtoCasual.Core.Managers;
 
-namespace ProtoCasual.Core.UI
+namespace ProtoCasual.Core.UI.Screens
 {
-    public class LoseScreen : UIScreen
+    /// <summary>Game over screen — retry, watch ad for revive, return to menu.</summary>
+    public class LoseScreen : ScreenController
     {
-        [Header("UI Elements")]
-        [SerializeField] private TextMeshProUGUI messageText;
-        [SerializeField] private Button retryButton;
-        [SerializeField] private Button menuButton;
-        [SerializeField] private Button watchAdButton;
+        public override string ScreenName => "LoseScreen";
 
-        protected override void OnInitialize()
+        protected override void OnBind()
         {
-            if (retryButton != null)
-                retryButton.onClick.AddListener(OnRetryClicked);
-
-            if (menuButton != null)
-                menuButton.onClick.AddListener(OnMenuClicked);
-
-            if (watchAdButton != null)
-                watchAdButton.onClick.AddListener(OnWatchAdClicked);
+            Btn("retry-btn")?.RegisterCallback<ClickEvent>(OnRetryClicked);
+            Btn("menu-btn")?.RegisterCallback<ClickEvent>(OnMenuClicked);
+            Btn("watch-ad-btn")?.RegisterCallback<ClickEvent>(OnWatchAdClicked);
         }
 
-        protected override void OnShow()
+        public override void OnShow()
         {
-            // Play fail audio
             if (AudioManager.Instance != null)
             {
                 AudioManager.Instance.PlayLevelFail();
@@ -38,32 +26,28 @@ namespace ProtoCasual.Core.UI
             }
         }
 
-        private void OnRetryClicked()
+        private void OnRetryClicked(ClickEvent evt)
         {
             AudioManager.Instance?.PlayButtonClick();
             GameManager.Instance?.Restart();
         }
 
-        private void OnMenuClicked()
+        private void OnMenuClicked(ClickEvent evt)
         {
             AudioManager.Instance?.PlayButtonClick();
             GameManager.Instance?.ReturnToMenu();
         }
 
-        private void OnWatchAdClicked()
+        private void OnWatchAdClicked(ClickEvent evt)
         {
             AudioManager.Instance?.PlayButtonClick();
-            var adsService = ServiceLocator.IsRegistered<IAdsService>()
-                ? ServiceLocator.Get<IAdsService>()
-                : null;
-            adsService?.ShowRewarded((success) =>
+            if (ServiceLocator.TryGet<IAdsService>(out var ads))
             {
-                if (success)
+                ads.ShowRewarded(success =>
                 {
-                    Hide();
-                    GameManager.Instance?.Resume();
-                }
-            });
+                    if (success) GameManager.Instance?.Resume();
+                });
+            }
         }
     }
 }

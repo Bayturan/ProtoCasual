@@ -186,8 +186,8 @@ namespace ProtoCasual.Core.Bootstrap
 
         protected virtual void InitializeManagers()
         {
-            if (UI.UIManager.Instance != null)
-                UI.UIManager.Instance.Initialize();
+            if (UI.UIToolkitManager.Instance != null)
+                UI.UIToolkitManager.Instance.Initialize();
 
             // Apply AudioConfig to AudioManager
             if (frameworkConfig != null && frameworkConfig.audioConfig != null &&

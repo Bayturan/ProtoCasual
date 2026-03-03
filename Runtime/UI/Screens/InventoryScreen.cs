@@ -1,182 +1,104 @@
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+using UnityEngine.UIElements;
 using ProtoCasual.Core.Bootstrap;
-using ProtoCasual.Core.Data;
 using ProtoCasual.Core.Interfaces;
-using ProtoCasual.Core.ScriptableObjects;
+using ProtoCasual.Core.Managers;
 using ProtoCasual.Core.Store;
 
-namespace ProtoCasual.Core.UI
+namespace ProtoCasual.Core.UI.Screens
 {
-    /// <summary>
-    /// Displays the player's owned items from <see cref="IInventoryService"/>
-    /// and resolves display data from <see cref="ItemDatabase"/>.
-    /// Refreshes automatically when the inventory changes.
-    /// </summary>
-    public class InventoryScreen : UIScreen
+    /// <summary>Inventory screen — view owned items with detail panel.</summary>
+    public class InventoryScreen : ScreenController
     {
-        [Header("References")]
-        [SerializeField] private ItemDatabase itemDatabase;
+        public override string ScreenName => "InventoryScreen";
 
-        [Header("Item List")]
-        [SerializeField] private Transform itemContainer;
-        [SerializeField] private GameObject inventoryItemPrefab;
-
-        [Header("Detail Panel")]
-        [SerializeField] private GameObject detailPanel;
-        [SerializeField] private Image detailIcon;
-        [SerializeField] private TextMeshProUGUI detailName;
-        [SerializeField] private TextMeshProUGUI detailDescription;
-        [SerializeField] private TextMeshProUGUI detailQuantity;
-        [SerializeField] private TextMeshProUGUI detailType;
-
-        [Header("Empty State")]
-        [SerializeField] private GameObject emptyStatePanel;
-        [SerializeField] private TextMeshProUGUI emptyStateText;
-
-        [Header("Navigation")]
-        [SerializeField] private Button closeButton;
+        private ScrollView itemList;
+        private VisualElement detailPanel;
+        private Label detailName;
+        private Label detailDescription;
+        private Label detailQuantity;
+        private Label detailType;
+        private VisualElement emptyState;
 
         private IInventoryService inventoryService;
-        private readonly List<GameObject> spawnedItems = new();
         private string selectedItemId;
 
-        // ─── Lifecycle ──────────────────────────────────────────────────
-
-        protected override void OnInitialize()
+        protected override void OnBind()
         {
-            inventoryService = ServiceLocator.Get<IInventoryService>();
+            ServiceLocator.TryGet<IInventoryService>(out inventoryService);
+            Btn("close-btn")?.RegisterCallback<ClickEvent>(OnCloseClicked);
 
-            if (closeButton != null)
-                closeButton.onClick.AddListener(OnCloseClicked);
+            itemList = SView("item-list");
+            detailPanel = Q("detail-panel");
+            detailName = Lbl("detail-name");
+            detailDescription = Lbl("detail-description");
+            detailQuantity = Lbl("detail-quantity");
+            detailType = Lbl("detail-type");
+            emptyState = Q("empty-state");
 
             if (inventoryService != null)
                 inventoryService.OnInventoryChanged += RefreshList;
-
-            HideDetail();
         }
 
-        protected override void OnShow()
-        {
-            RefreshList();
-            HideDetail();
-        }
-
-        protected override void OnHide()
-        {
-            selectedItemId = null;
-        }
-
-        private void OnDestroy()
-        {
-            if (inventoryService != null)
-                inventoryService.OnInventoryChanged -= RefreshList;
-        }
-
-        // ─── Item List ─────────────────────────────────────────────────
+        public override void OnShow() { RefreshList(); HideDetail(); }
+        public override void OnHide() { selectedItemId = null; }
 
         private void RefreshList()
         {
-            ClearSpawnedItems();
+            if (itemList == null) return;
+            itemList.Clear();
 
-            if (inventoryService == null || inventoryItemPrefab == null || itemContainer == null)
-                return;
-
-            var items = inventoryService.GetAll();
-
-            // Empty state
+            var items = inventoryService?.GetAll();
             bool empty = items == null || items.Count == 0;
-            if (emptyStatePanel != null) emptyStatePanel.SetActive(empty);
-            if (empty)
-            {
-                if (emptyStateText != null) emptyStateText.text = "No items yet. Visit the Store!";
-                return;
-            }
 
-            if (emptyStatePanel != null) emptyStatePanel.SetActive(false);
+            if (emptyState != null)
+                emptyState.style.display = empty ? DisplayStyle.Flex : DisplayStyle.None;
+            if (empty) return;
+
+            ServiceLocator.TryGet<ItemDatabase>(out var db);
 
             foreach (var entry in items)
             {
                 if (entry == null || string.IsNullOrEmpty(entry.ItemId)) continue;
 
-                var go = Instantiate(inventoryItemPrefab, itemContainer);
-                spawnedItems.Add(go);
+                var config = db?.Get(entry.ItemId);
+                var card = new VisualElement();
+                card.AddToClassList("inventory-item-card");
 
-                // Try to resolve display info from ItemDatabase
-                ItemConfig config = itemDatabase != null ? itemDatabase.Get(entry.ItemId) : null;
+                string displayName = config != null ? config.DisplayName : entry.ItemId;
+                var nameLabel = new Label(entry.Quantity > 1 ? $"{displayName}  x{entry.Quantity}" : displayName);
+                nameLabel.AddToClassList("item-name");
+                card.Add(nameLabel);
 
-                // Icon
-                var icon = go.GetComponentInChildren<Image>();
-                if (icon != null && config != null && config.Icon != null)
-                    icon.sprite = config.Icon;
-
-                // Label — show display name + quantity
-                var label = go.GetComponentInChildren<TextMeshProUGUI>();
-                if (label != null)
-                {
-                    string displayName = config != null ? config.DisplayName : entry.ItemId;
-                    label.text = entry.Quantity > 1
-                        ? $"{displayName}  x{entry.Quantity}"
-                        : displayName;
-                }
-
-                // Select button
                 string capturedId = entry.ItemId;
-                var btn = go.GetComponent<Button>();
-                if (btn == null) btn = go.AddComponent<Button>();
-                btn.onClick.AddListener(() => SelectItem(capturedId));
+                card.RegisterCallback<ClickEvent>(_ => SelectItem(capturedId));
+                itemList.Add(card);
             }
         }
-
-        private void ClearSpawnedItems()
-        {
-            foreach (var go in spawnedItems)
-            {
-                if (go != null) Destroy(go);
-            }
-            spawnedItems.Clear();
-        }
-
-        // ─── Detail Panel ───────────────────────────────────────────────
 
         private void SelectItem(string itemId)
         {
             selectedItemId = itemId;
+            ServiceLocator.TryGet<ItemDatabase>(out var db);
+            var config = db?.Get(itemId);
+            int quantity = inventoryService?.GetQuantity(itemId) ?? 0;
 
-            ItemConfig config = itemDatabase != null ? itemDatabase.Get(itemId) : null;
-            int quantity = inventoryService != null ? inventoryService.GetQuantity(itemId) : 0;
-
-            if (detailPanel != null) detailPanel.SetActive(true);
-
-            if (detailIcon != null)
-                detailIcon.sprite = config != null ? config.Icon : null;
-
-            if (detailName != null)
-                detailName.text = config != null ? config.DisplayName : itemId;
-
-            if (detailDescription != null)
-                detailDescription.text = config != null ? config.Description : string.Empty;
-
-            if (detailQuantity != null)
-                detailQuantity.text = $"Owned: {quantity}";
-
-            if (detailType != null)
-                detailType.text = config != null ? config.Type.ToString() : string.Empty;
+            if (detailPanel != null) detailPanel.style.display = DisplayStyle.Flex;
+            if (detailName != null) detailName.text = config?.DisplayName ?? itemId;
+            if (detailDescription != null) detailDescription.text = config?.Description ?? "";
+            if (detailQuantity != null) detailQuantity.text = $"Owned: {quantity}";
+            if (detailType != null) detailType.text = config?.Type.ToString() ?? "";
         }
 
         private void HideDetail()
         {
-            if (detailPanel != null) detailPanel.SetActive(false);
+            if (detailPanel != null) detailPanel.style.display = DisplayStyle.None;
             selectedItemId = null;
         }
 
-        // ─── Navigation ─────────────────────────────────────────────────
-
-        private void OnCloseClicked()
+        private void OnCloseClicked(ClickEvent evt)
         {
-            UIManager.Instance.ShowScreen("MenuScreen");
+            AudioManager.Instance?.PlayButtonClick();
+            UIToolkitManager.Instance?.ShowScreen("MainScreen");
         }
     }
 }

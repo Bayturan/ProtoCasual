@@ -1,0 +1,13 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="lose-screen" class="screen result-screen lose-screen">
+        <ui:VisualElement class="overlay-bg" />
+        <ui:VisualElement class="result-panel">
+            <ui:Label text="GAME OVER" class="result-title lose-title" />
+            <ui:VisualElement class="button-column">
+                <ui:Button name="retry-btn" text="RETRY" class="btn btn-primary" />
+                <ui:Button name="watch-ad-btn" text="WATCH AD" class="btn btn-accent" />
+                <ui:Button name="menu-btn" text="MENU" class="btn btn-tertiary" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

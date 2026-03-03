@@ -1,65 +1,51 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+using UnityEngine.UIElements;
 using ProtoCasual.Core.Interfaces;
 
-namespace ProtoCasual.Core.UI
+namespace ProtoCasual.Core.UI.Popups
 {
-    /// <summary>
-    /// Data passed to <see cref="RewardPopup.Show"/>.
-    /// </summary>
     public class RewardPopupData
     {
         public string Title = "Reward!";
         public RewardEntry[] Rewards;
     }
 
-    /// <summary>
-    /// Shows granted rewards (coins, gems, items) in a popup.
-    /// </summary>
-    public class RewardPopup : PopupBase
+    /// <summary>Reward display popup — shows earned rewards with a collect button.</summary>
+    public class RewardPopup : PopupController
     {
         public override string PopupName => "RewardPopup";
 
-        [Header("UI")]
-        [SerializeField] private TextMeshProUGUI titleText;
-        [SerializeField] private Transform rewardContainer;
-        [SerializeField] private GameObject rewardEntryPrefab;
-        [SerializeField] private Button collectButton;
+        private Label titleLabel;
+        private VisualElement rewardContainer;
 
-        protected override void Awake()
+        protected override void OnBind()
         {
-            base.Awake();
-            if (collectButton != null)
-                collectButton.onClick.AddListener(() => Hide());
+            titleLabel = Lbl("title-text");
+            rewardContainer = Q("reward-container");
+            Btn("collect-btn")?.RegisterCallback<ClickEvent>(_ => Hide());
         }
 
         protected override void OnShow(object data)
         {
-            ClearContainer();
+            rewardContainer?.Clear();
 
             if (data is RewardPopupData d)
             {
-                if (titleText != null) titleText.text = d.Title;
-
-                if (d.Rewards != null && rewardEntryPrefab != null && rewardContainer != null)
+                if (titleLabel != null) titleLabel.text = d.Title;
+                if (d.Rewards != null && rewardContainer != null)
                 {
                     foreach (var reward in d.Rewards)
                     {
                         if (reward == null) continue;
-                        var go = Instantiate(rewardEntryPrefab, rewardContainer);
-                        var label = go.GetComponentInChildren<TextMeshProUGUI>();
-                        if (label != null)
+                        string typeName = reward.Type switch
                         {
-                            string typeName = reward.Type switch
-                            {
-                                RewardType.SoftCurrency => "Coins",
-                                RewardType.HardCurrency => "Gems",
-                                RewardType.Item => reward.RewardId,
-                                _ => "Reward"
-                            };
-                            label.text = $"+{reward.Amount} {typeName}";
-                        }
+                            RewardType.SoftCurrency => "Coins",
+                            RewardType.HardCurrency => "Gems",
+                            RewardType.Item => reward.RewardId,
+                            _ => "Reward"
+                        };
+                        var entry = new Label($"+{reward.Amount} {typeName}");
+                        entry.AddToClassList("reward-entry");
+                        rewardContainer.Add(entry);
                     }
                 }
             }
@@ -67,14 +53,7 @@ namespace ProtoCasual.Core.UI
 
         protected override void OnHide()
         {
-            ClearContainer();
-        }
-
-        private void ClearContainer()
-        {
-            if (rewardContainer == null) return;
-            for (int i = rewardContainer.childCount - 1; i >= 0; i--)
-                Destroy(rewardContainer.GetChild(i).gameObject);
+            rewardContainer?.Clear();
         }
     }
 }

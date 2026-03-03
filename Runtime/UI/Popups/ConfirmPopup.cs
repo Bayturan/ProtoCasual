@@ -1,13 +1,8 @@
 using System;
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+using UnityEngine.UIElements;
 
-namespace ProtoCasual.Core.UI
+namespace ProtoCasual.Core.UI.Popups
 {
-    /// <summary>
-    /// Data passed to <see cref="ConfirmPopup.Show"/>.
-    /// </summary>
     public class ConfirmPopupData
     {
         public string Title;
@@ -18,42 +13,38 @@ namespace ProtoCasual.Core.UI
         public Action OnCancel;
     }
 
-    /// <summary>
-    /// Generic confirmation dialog. Pass <see cref="ConfirmPopupData"/> to Show().
-    /// </summary>
-    public class ConfirmPopup : PopupBase
+    /// <summary>Generic confirmation dialog — title, message, confirm/cancel buttons.</summary>
+    public class ConfirmPopup : PopupController
     {
         public override string PopupName => "ConfirmPopup";
 
-        [Header("UI")]
-        [SerializeField] private TextMeshProUGUI titleText;
-        [SerializeField] private TextMeshProUGUI messageText;
-        [SerializeField] private Button confirmButton;
-        [SerializeField] private TextMeshProUGUI confirmLabel;
-        [SerializeField] private Button cancelButton;
-        [SerializeField] private TextMeshProUGUI cancelLabel;
+        private Label titleLabel;
+        private Label messageLabel;
+        private Button confirmBtn;
+        private Button cancelBtn;
 
         private Action onConfirm;
         private Action onCancel;
 
-        protected override void Awake()
+        protected override void OnBind()
         {
-            base.Awake();
+            titleLabel = Lbl("title-text");
+            messageLabel = Lbl("message-text");
+            confirmBtn = Btn("confirm-btn");
+            cancelBtn = Btn("cancel-btn");
 
-            if (confirmButton != null)
-                confirmButton.onClick.AddListener(OnConfirmClicked);
-            if (cancelButton != null)
-                cancelButton.onClick.AddListener(OnCancelClicked);
+            confirmBtn?.RegisterCallback<ClickEvent>(_ => { onConfirm?.Invoke(); Hide(); });
+            cancelBtn?.RegisterCallback<ClickEvent>(_ => { onCancel?.Invoke(); Hide(); });
         }
 
         protected override void OnShow(object data)
         {
             if (data is ConfirmPopupData d)
             {
-                if (titleText != null) titleText.text = d.Title ?? "";
-                if (messageText != null) messageText.text = d.Message ?? "";
-                if (confirmLabel != null) confirmLabel.text = d.ConfirmLabel;
-                if (cancelLabel != null) cancelLabel.text = d.CancelLabel;
+                if (titleLabel != null) titleLabel.text = d.Title ?? "";
+                if (messageLabel != null) messageLabel.text = d.Message ?? "";
+                if (confirmBtn != null) confirmBtn.text = d.ConfirmLabel;
+                if (cancelBtn != null) cancelBtn.text = d.CancelLabel;
                 onConfirm = d.OnConfirm;
                 onCancel = d.OnCancel;
             }
@@ -63,18 +54,6 @@ namespace ProtoCasual.Core.UI
         {
             onConfirm = null;
             onCancel = null;
-        }
-
-        private void OnConfirmClicked()
-        {
-            onConfirm?.Invoke();
-            Hide();
-        }
-
-        private void OnCancelClicked()
-        {
-            onCancel?.Invoke();
-            Hide();
         }
     }
 }

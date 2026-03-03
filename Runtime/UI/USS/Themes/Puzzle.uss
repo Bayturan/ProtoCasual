@@ -1,0 +1,19 @@
+/* ProtoCasual Theme — Puzzle
+   Clean, minimal, soft pastel tones with light backgrounds. */
+
+:root {
+    --color-bg: #f0f4f8;
+    --color-surface: #ffffff;
+    --color-primary: #5b86e5;
+    --color-secondary: #36d1dc;
+    --color-accent: #ff7eb3;
+    --color-text: #2d3436;
+    --color-text-secondary: #636e72;
+    --color-success: #00b894;
+    --color-danger: #d63031;
+    --color-warning: #fdcb6e;
+    --color-overlay: rgba(45, 52, 54, 0.7);
+    --border-radius: 8px;
+    --border-radius-sm: 6px;
+    --border-radius-lg: 12px;
+}

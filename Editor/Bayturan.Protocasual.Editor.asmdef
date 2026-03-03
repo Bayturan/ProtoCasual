@@ -2,8 +2,7 @@
     "name": "Bayturan.Protocasual.Editor",
     "rootNamespace": "ProtoCasual.Editor",
     "references": [
-        "Bayturan.Protocasual",
-        "Unity.TextMeshPro"
+        "Bayturan.Protocasual"
     ],
     "includePlatforms": [
         "Editor"

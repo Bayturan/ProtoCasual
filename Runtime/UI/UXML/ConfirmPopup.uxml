@@ -1,0 +1,13 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="confirm-popup" class="popup-overlay">
+        <ui:VisualElement class="popup-backdrop" />
+        <ui:VisualElement class="popup-panel popup-sm">
+            <ui:Label name="title-text" text="Confirm" class="popup-title" />
+            <ui:Label name="message-text" text="Are you sure?" class="popup-message" />
+            <ui:VisualElement class="button-row popup-actions">
+                <ui:Button name="cancel-btn" text="Cancel" class="btn btn-secondary" />
+                <ui:Button name="confirm-btn" text="OK" class="btn btn-primary" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

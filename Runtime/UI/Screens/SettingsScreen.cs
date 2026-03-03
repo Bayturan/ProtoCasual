@@ -1,154 +1,88 @@
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+using UnityEngine.UIElements;
 using ProtoCasual.Core.Bootstrap;
 using ProtoCasual.Core.Interfaces;
 using ProtoCasual.Core.Managers;
+using ProtoCasual.Core.UI.Popups;
 
-namespace ProtoCasual.Core.UI
+namespace ProtoCasual.Core.UI.Screens
 {
-    /// <summary>
-    /// Settings screen with audio, haptic, and data-reset controls.
-    /// Reads/writes AudioManager and IHapticService state.
-    /// </summary>
-    public class SettingsScreen : UIScreen
+    /// <summary>Settings screen — audio toggles/sliders, vibration, reset data.</summary>
+    public class SettingsScreen : ScreenController
     {
-        [Header("Sound")]
-        [SerializeField] private Toggle musicToggle;
-        [SerializeField] private Slider musicVolumeSlider;
-        [SerializeField] private Toggle sfxToggle;
-        [SerializeField] private Slider sfxVolumeSlider;
+        public override string ScreenName => "SettingsScreen";
 
-        [Header("Haptics")]
-        [SerializeField] private Toggle vibrationToggle;
-
-        [Header("Data")]
-        [SerializeField] private Button resetDataButton;
-
-        [Header("Navigation")]
-        [SerializeField] private Button closeButton;
+        private Toggle musicToggle;
+        private Slider musicVolSlider;
+        private Toggle sfxToggle;
+        private Slider sfxVolSlider;
+        private Toggle vibrationToggle;
 
         private IHapticService hapticService;
 
-        protected override void OnInitialize()
+        protected override void OnBind()
         {
-            hapticService = ServiceLocator.IsRegistered<IHapticService>()
-                ? ServiceLocator.Get<IHapticService>()
-                : null;
+            ServiceLocator.TryGet<IHapticService>(out hapticService);
 
-            // Music
-            if (musicToggle != null)
-                musicToggle.onValueChanged.AddListener(OnMusicToggled);
+            musicToggle = Tgl("music-toggle");
+            musicVolSlider = Sld("music-volume");
+            sfxToggle = Tgl("sfx-toggle");
+            sfxVolSlider = Sld("sfx-volume");
+            vibrationToggle = Tgl("vibration-toggle");
 
-            if (musicVolumeSlider != null)
-                musicVolumeSlider.onValueChanged.AddListener(OnMusicVolumeChanged);
+            musicToggle?.RegisterValueChangedCallback(e => AudioManager.Instance?.SetMusicEnabled(e.newValue));
+            musicVolSlider?.RegisterValueChangedCallback(e => AudioManager.Instance?.SetMusicVolume(e.newValue));
+            sfxToggle?.RegisterValueChangedCallback(e => AudioManager.Instance?.SetSfxEnabled(e.newValue));
+            sfxVolSlider?.RegisterValueChangedCallback(e => AudioManager.Instance?.SetSfxVolume(e.newValue));
+            vibrationToggle?.RegisterValueChangedCallback(e =>
+            {
+                if (hapticService != null) hapticService.IsEnabled = e.newValue;
+            });
 
-            // SFX
-            if (sfxToggle != null)
-                sfxToggle.onValueChanged.AddListener(OnSfxToggled);
-
-            if (sfxVolumeSlider != null)
-                sfxVolumeSlider.onValueChanged.AddListener(OnSfxVolumeChanged);
-
-            // Vibration
-            if (vibrationToggle != null)
-                vibrationToggle.onValueChanged.AddListener(OnVibrationToggled);
-
-            // Reset
-            if (resetDataButton != null)
-                resetDataButton.onClick.AddListener(OnResetDataClicked);
-
-            // Close
-            if (closeButton != null)
-                closeButton.onClick.AddListener(OnCloseClicked);
+            Btn("reset-data-btn")?.RegisterCallback<ClickEvent>(OnResetDataClicked);
+            Btn("close-btn")?.RegisterCallback<ClickEvent>(OnCloseClicked);
         }
 
-        protected override void OnShow()
-        {
-            RefreshUI();
-        }
-
-        // ─── Refresh ────────────────────────────────────────────────────
+        public override void OnShow() { RefreshUI(); }
 
         private void RefreshUI()
         {
             var audio = AudioManager.Instance;
             if (audio != null)
             {
-                if (musicToggle != null) musicToggle.SetIsOnWithoutNotify(audio.IsMusicEnabled);
-                if (sfxToggle != null) sfxToggle.SetIsOnWithoutNotify(audio.IsSfxEnabled);
+                musicToggle?.SetValueWithoutNotify(audio.IsMusicEnabled);
+                sfxToggle?.SetValueWithoutNotify(audio.IsSfxEnabled);
             }
-
-            if (vibrationToggle != null && hapticService != null)
-                vibrationToggle.SetIsOnWithoutNotify(hapticService.IsEnabled);
-        }
-
-        // ─── Callbacks ──────────────────────────────────────────────────
-
-        private void OnMusicToggled(bool isOn)
-        {
-            AudioManager.Instance?.SetMusicEnabled(isOn);
-        }
-
-        private void OnMusicVolumeChanged(float value)
-        {
-            AudioManager.Instance?.SetMusicVolume(value);
-        }
-
-        private void OnSfxToggled(bool isOn)
-        {
-            AudioManager.Instance?.SetSfxEnabled(isOn);
-        }
-
-        private void OnSfxVolumeChanged(float value)
-        {
-            AudioManager.Instance?.SetSfxVolume(value);
-        }
-
-        private void OnVibrationToggled(bool isOn)
-        {
             if (hapticService != null)
-                hapticService.IsEnabled = isOn;
+                vibrationToggle?.SetValueWithoutNotify(hapticService.IsEnabled);
         }
 
-        private void OnResetDataClicked()
+        private void OnResetDataClicked(ClickEvent evt)
         {
-            if (PopupManager.Instance != null)
+            AudioManager.Instance?.PlayButtonClick();
+            UIToolkitManager.Instance?.ShowPopup("ConfirmPopup", new ConfirmPopupData
             {
-                PopupManager.Instance.ShowPopup("ConfirmPopup", new ConfirmPopupData
-                {
-                    Title = "Reset Data",
-                    Message = "Are you sure you want to reset all progress? This cannot be undone.",
-                    ConfirmLabel = "Reset",
-                    CancelLabel = "Cancel",
-                    OnConfirm = DoResetData
-                });
-            }
-            else
-            {
-                DoResetData();
-            }
+                Title = "Reset Data",
+                Message = "Are you sure you want to reset all progress? This cannot be undone.",
+                ConfirmLabel = "Reset",
+                CancelLabel = "Cancel",
+                OnConfirm = DoReset
+            });
         }
 
-        private void DoResetData()
+        private void DoReset()
         {
-            var save = ServiceLocator.IsRegistered<ISaveService>()
-                ? ServiceLocator.Get<ISaveService>()
-                : null;
+            ServiceLocator.TryGet<ISaveService>(out var save);
             save?.DeleteAll();
-
-            var dataProvider = ServiceLocator.IsRegistered<Data.PlayerDataProvider>()
-                ? ServiceLocator.Get<Data.PlayerDataProvider>()
-                : null;
-            dataProvider?.Reset();
-
+            ServiceLocator.TryGet<Data.PlayerDataProvider>(out var dp);
+            dp?.Reset();
             Debug.Log("[SettingsScreen] All data reset.");
         }
 
-        private void OnCloseClicked()
+        private void OnCloseClicked(ClickEvent evt)
         {
             AudioManager.Instance?.PlayButtonClick();
-            UIManager.Instance.ShowScreen(nameof(MenuScreen));
+            UIToolkitManager.Instance?.ShowScreen("MainScreen");
         }
     }
 }

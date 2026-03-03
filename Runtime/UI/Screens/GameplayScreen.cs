@@ -1,44 +1,41 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using ProtoCasual.Core.Managers;
+using UnityEngine.UIElements;
 using ProtoCasual.Core.GameLoop;
+using ProtoCasual.Core.Managers;
 
-namespace ProtoCasual.Core.UI
+namespace ProtoCasual.Core.UI.Screens
 {
-    public class GameplayScreen : UIScreen
+    /// <summary>In-game HUD — score, time, level, pause button, progress bar.</summary>
+    public class GameplayScreen : ScreenController
     {
-        [Header("UI Elements")]
-        [SerializeField] private TextMeshProUGUI scoreText;
-        [SerializeField] private TextMeshProUGUI timeText;
-        [SerializeField] private TextMeshProUGUI levelText;
-        [SerializeField] private Button pauseButton;
-        [SerializeField] private Slider progressSlider;
+        public override string ScreenName => "GameplayScreen";
 
-        protected override void OnInitialize()
+        private Label scoreLabel;
+        private Label timeLabel;
+        private Label levelLabel;
+        private ProgressBar progressBar;
+
+        protected override void OnBind()
         {
-            if (pauseButton != null)
-                pauseButton.onClick.AddListener(OnPauseClicked);
+            Btn("pause-btn")?.RegisterCallback<ClickEvent>(OnPauseClicked);
+            scoreLabel = Lbl("score-text");
+            timeLabel = Lbl("time-text");
+            levelLabel = Lbl("level-text");
+            progressBar = PBar("progress-bar");
         }
 
-        protected override void OnShow()
+        public override void OnShow()
         {
             UpdateUI();
-
-            // Show current level
-            if (levelText != null)
+            if (levelLabel != null)
             {
                 var levelMgr = LevelManager.Instance;
                 int lvl = levelMgr != null ? levelMgr.CurrentLevelIndex + 1 : 1;
-                levelText.text = $"Level {lvl}";
+                levelLabel.text = $"Level {lvl}";
             }
-
-            // Start gameplay music
-            if (AudioManager.Instance != null)
-                AudioManager.Instance.PlayGameplayMusic();
+            AudioManager.Instance?.PlayGameplayMusic();
         }
 
-        private void Update()
+        public override void OnUpdate(float deltaTime)
         {
             if (GameManager.Instance != null &&
                 GameManager.Instance.CurrentState == GameState.Playing)
@@ -47,36 +44,19 @@ namespace ProtoCasual.Core.UI
             }
         }
 
-        public void AddScore(int points)
-        {
-            GameManager.Instance?.AddScore(points);
-        }
-
-        public void SetLevelText(string text)
-        {
-            if (levelText != null)
-                levelText.text = text;
-        }
-
-        public void SetProgress(float progress)
-        {
-            if (progressSlider != null)
-                progressSlider.value = progress;
-        }
+        public void SetLevelText(string text) { if (levelLabel != null) levelLabel.text = text; }
+        public void SetProgress(float progress) { if (progressBar != null) progressBar.value = progress * 100f; }
+        public void AddScore(int points) => GameManager.Instance?.AddScore(points);
 
         private void UpdateUI()
         {
             var gm = GameManager.Instance;
             if (gm == null) return;
-
-            if (scoreText != null)
-                scoreText.text = $"Score: {gm.CurrentScore}";
-
-            if (timeText != null)
-                timeText.text = $"Time: {gm.GameTime:F1}s";
+            if (scoreLabel != null) scoreLabel.text = $"Score: {gm.CurrentScore}";
+            if (timeLabel != null) timeLabel.text = $"Time: {gm.GameTime:F1}s";
         }
 
-        private void OnPauseClicked()
+        private void OnPauseClicked(ClickEvent evt)
         {
             AudioManager.Instance?.PlayButtonClick();
             GameManager.Instance?.Pause();

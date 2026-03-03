@@ -1,0 +1,19 @@
+/* ProtoCasual Theme — Hybrid
+   Professional and balanced, modern dark UI. */
+
+:root {
+    --color-bg: #1e272e;
+    --color-surface: #2c3e50;
+    --color-primary: #0984e3;
+    --color-secondary: #00cec9;
+    --color-accent: #fd79a8;
+    --color-text: #dfe6e9;
+    --color-text-secondary: #b2bec3;
+    --color-success: #00b894;
+    --color-danger: #d63031;
+    --color-warning: #ffeaa7;
+    --color-overlay: rgba(30, 39, 46, 0.85);
+    --border-radius: 10px;
+    --border-radius-sm: 8px;
+    --border-radius-lg: 14px;
+}

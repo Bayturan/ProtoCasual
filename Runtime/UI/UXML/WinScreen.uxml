@@ -1,0 +1,17 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="win-screen" class="screen result-screen win-screen">
+        <ui:VisualElement class="overlay-bg" />
+        <ui:VisualElement class="result-panel">
+            <ui:Label text="YOU WIN!" class="result-title win-title" />
+            <ui:VisualElement class="result-stats">
+                <ui:Label name="score-text" text="Score: 0" class="stat-text" />
+                <ui:Label name="time-text" text="Time: 0.00s" class="stat-text" />
+            </ui:VisualElement>
+            <ui:VisualElement class="button-column">
+                <ui:Button name="next-btn" text="NEXT LEVEL" class="btn btn-primary" />
+                <ui:Button name="restart-btn" text="RESTART" class="btn btn-secondary" />
+                <ui:Button name="menu-btn" text="MENU" class="btn btn-tertiary" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

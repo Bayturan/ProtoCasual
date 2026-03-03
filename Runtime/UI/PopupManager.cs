@@ -1,89 +1,71 @@
 using System.Collections.Generic;
 using UnityEngine;
-using ProtoCasual.Core.Interfaces;
-using ProtoCasual.Core.Utilities;
+using UnityEngine.UIElements;
 
 namespace ProtoCasual.Core.UI
 {
     /// <summary>
-    /// Manages overlay popups (confirmation dialogs, reward popups, etc.).
-    /// Supports stacking — multiple popups can be open at once.
-    /// Place on the same Canvas as UIManager or on a dedicated higher-sort-order Canvas.
+    /// Manages popup overlays within the UI Toolkit tree.
+    /// Popups are stacked; HideTop() pops the most recent.
     /// </summary>
-    public class PopupManager : Singleton<PopupManager>
+    public class PopupManager
     {
-        [SerializeField] private PopupBase[] popups;
+        private readonly VisualElement container;
+        private readonly Dictionary<string, PopupController> popups = new();
+        private readonly Stack<PopupController> activeStack = new();
 
-        private readonly Dictionary<string, PopupBase> popupDict = new();
-        private readonly Stack<PopupBase> activeStack = new();
-
-        protected override void Awake()
+        public PopupManager(VisualElement container)
         {
-            base.Awake();
-            RegisterPopups();
+            this.container = container;
         }
 
-        private void RegisterPopups()
+        public void Register(string name, VisualTreeAsset layout, PopupController controller)
         {
-            if (popups == null || popups.Length == 0)
-                popups = GetComponentsInChildren<PopupBase>(true);
+            if (layout == null || controller == null) return;
 
-            popupDict.Clear();
-            foreach (var popup in popups)
-            {
-                if (popup != null && !popupDict.ContainsKey(popup.PopupName))
-                {
-                    popupDict.Add(popup.PopupName, popup);
-                    popup.Hide();
-                }
-            }
+            var instance = layout.Instantiate();
+            instance.style.position = Position.Absolute;
+            instance.style.left = 0;
+            instance.style.right = 0;
+            instance.style.top = 0;
+            instance.style.bottom = 0;
+            container.Add(instance);
+            controller.Bind(instance);
+            popups[name] = controller;
         }
 
-        /// <summary>
-        /// Show a popup by name. Pushes onto the stack.
-        /// </summary>
-        public void ShowPopup(string popupName, object data = null)
+        public void Show(string name, object data = null)
         {
-            if (string.IsNullOrEmpty(popupName)) return;
-            if (!popupDict.TryGetValue(popupName, out var popup))
+            if (string.IsNullOrEmpty(name)) return;
+            if (!popups.TryGetValue(name, out var popup))
             {
-                Debug.LogWarning($"[PopupManager] Popup '{popupName}' not found!");
+                Debug.LogWarning($"[PopupManager] Popup '{name}' not found!");
                 return;
             }
-
             popup.Show(data);
             activeStack.Push(popup);
         }
 
-        /// <summary>
-        /// Show a popup by type.
-        /// </summary>
-        public void ShowPopup<T>(object data = null) where T : PopupBase
+        public void Show<T>(object data = null) where T : PopupController
         {
-            foreach (var kvp in popupDict)
+            foreach (var kvp in popups)
             {
                 if (kvp.Value is T)
                 {
-                    ShowPopup(kvp.Key, data);
+                    Show(kvp.Key, data);
                     return;
                 }
             }
             Debug.LogWarning($"[PopupManager] Popup of type '{typeof(T).Name}' not found!");
         }
 
-        /// <summary>
-        /// Hide a specific popup by name.
-        /// </summary>
-        public void HidePopup(string popupName)
+        public void Hide(string name)
         {
-            if (popupDict.TryGetValue(popupName, out var popup))
+            if (popups.TryGetValue(name, out var popup))
                 popup.Hide();
         }
 
-        /// <summary>
-        /// Hide the topmost popup on the stack.
-        /// </summary>
-        public void HideTopPopup()
+        public void HideTop()
         {
             while (activeStack.Count > 0)
             {
@@ -96,37 +78,26 @@ namespace ProtoCasual.Core.UI
             }
         }
 
-        /// <summary>
-        /// Hide all open popups.
-        /// </summary>
         public void HideAll()
         {
-            foreach (var popup in popupDict.Values)
-            {
+            foreach (var popup in popups.Values)
                 if (popup.IsVisible) popup.Hide();
-            }
             activeStack.Clear();
         }
 
-        /// <summary>
-        /// True if any popup is currently visible.
-        /// </summary>
         public bool HasActivePopup
         {
             get
             {
-                foreach (var popup in popupDict.Values)
+                foreach (var popup in popups.Values)
                     if (popup.IsVisible) return true;
                 return false;
             }
         }
 
-        /// <summary>
-        /// Get a typed popup reference.
-        /// </summary>
-        public T GetPopup<T>() where T : PopupBase
+        public T Get<T>() where T : PopupController
         {
-            foreach (var popup in popupDict.Values)
+            foreach (var popup in popups.Values)
                 if (popup is T typed) return typed;
             return null;
         }

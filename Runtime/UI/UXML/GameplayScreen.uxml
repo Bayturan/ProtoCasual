@@ -1,0 +1,19 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="gameplay-screen" class="screen gameplay-screen">
+        <!-- Top HUD -->
+        <ui:VisualElement class="hud-top">
+            <ui:Label name="score-text" text="Score: 0" class="hud-text" />
+            <ui:Label name="level-text" text="Level 1" class="hud-text hud-center" />
+            <ui:Button name="pause-btn" text="||" class="btn btn-icon" />
+        </ui:VisualElement>
+
+        <!-- Spacer pushes bottom HUD down -->
+        <ui:VisualElement class="hud-spacer" />
+
+        <!-- Bottom HUD -->
+        <ui:VisualElement class="hud-bottom">
+            <ui:Label name="time-text" text="Time: 0.0s" class="hud-text" />
+            <ui:ProgressBar name="progress-bar" title="" low-value="0" high-value="100" class="progress-bar" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

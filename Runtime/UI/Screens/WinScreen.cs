@@ -1,70 +1,54 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+using UnityEngine.UIElements;
 using ProtoCasual.Core.Managers;
-using ProtoCasual.Core.GameLoop;
 
-namespace ProtoCasual.Core.UI
+namespace ProtoCasual.Core.UI.Screens
 {
-    public class WinScreen : UIScreen
+    /// <summary>Victory screen — score, time, next level / restart / menu buttons.</summary>
+    public class WinScreen : ScreenController
     {
-        [Header("UI Elements")]
-        [SerializeField] private TextMeshProUGUI scoreText;
-        [SerializeField] private TextMeshProUGUI timeText;
-        [SerializeField] private Button nextButton;
-        [SerializeField] private Button restartButton;
-        [SerializeField] private Button menuButton;
+        public override string ScreenName => "WinScreen";
 
-        protected override void OnInitialize()
+        private Label scoreLabel;
+        private Label timeLabel;
+
+        protected override void OnBind()
         {
-            if (nextButton != null)
-                nextButton.onClick.AddListener(OnNextClicked);
-
-            if (restartButton != null)
-                restartButton.onClick.AddListener(OnRestartClicked);
-
-            if (menuButton != null)
-                menuButton.onClick.AddListener(OnMenuClicked);
+            Btn("next-btn")?.RegisterCallback<ClickEvent>(OnNextClicked);
+            Btn("restart-btn")?.RegisterCallback<ClickEvent>(OnRestartClicked);
+            Btn("menu-btn")?.RegisterCallback<ClickEvent>(OnMenuClicked);
+            scoreLabel = Lbl("score-text");
+            timeLabel = Lbl("time-text");
         }
 
-        protected override void OnShow()
+        public override void OnShow()
         {
-            // Display final score & time
             var gm = GameManager.Instance;
             if (gm != null)
             {
-                if (scoreText != null)
-                    scoreText.text = $"Score: {gm.CurrentScore}";
-
-                if (timeText != null)
-                    timeText.text = $"Time: {gm.GameTime:F2}s";
+                if (scoreLabel != null) scoreLabel.text = $"Score: {gm.CurrentScore}";
+                if (timeLabel != null) timeLabel.text = $"Time: {gm.GameTime:F2}s";
             }
-
-            // Play win audio
             if (AudioManager.Instance != null)
             {
                 AudioManager.Instance.PlayLevelComplete();
                 AudioManager.Instance.PlayWinMusic();
             }
-
-            // Advance to next level
-            if (LevelManager.Instance != null)
-                LevelManager.Instance.NextLevel();
+            LevelManager.Instance?.NextLevel();
         }
 
-        private void OnNextClicked()
+        private void OnNextClicked(ClickEvent evt)
         {
             AudioManager.Instance?.PlayButtonClick();
             GameManager.Instance?.Restart();
         }
 
-        private void OnRestartClicked()
+        private void OnRestartClicked(ClickEvent evt)
         {
             AudioManager.Instance?.PlayButtonClick();
             GameManager.Instance?.Restart();
         }
 
-        private void OnMenuClicked()
+        private void OnMenuClicked(ClickEvent evt)
         {
             AudioManager.Instance?.PlayButtonClick();
             GameManager.Instance?.ReturnToMenu();
