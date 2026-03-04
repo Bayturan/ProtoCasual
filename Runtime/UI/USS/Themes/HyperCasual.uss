@@ -1,19 +1,28 @@
 /* ProtoCasual Theme — HyperCasual
-   Bright, playful, saturated colors with rounded shapes. */
+   Bright, playful, saturated, super-bubbly shapes.
+   One-tap games. Fun first, depth second. */
 
 :root {
     --color-bg: #1a0b2e;
     --color-surface: #2d1b69;
     --color-primary: #ff6b6b;
+    --color-primary-dark: #c0392b;
     --color-secondary: #ffd93d;
+    --color-secondary-dark: #d4a017;
     --color-accent: #6bcb77;
+    --color-accent-dark: #3d8b4f;
     --color-text: #ffffff;
     --color-text-secondary: #c8b6ff;
     --color-success: #6bcb77;
+    --color-success-dark: #3d8b4f;
     --color-danger: #ff6b6b;
+    --color-danger-dark: #c0392b;
     --color-warning: #ffd93d;
-    --color-overlay: rgba(26, 11, 46, 0.85);
-    --border-radius: 20px;
-    --border-radius-sm: 14px;
-    --border-radius-lg: 28px;
+    --color-warning-dark: #d4a017;
+    --color-overlay: rgba(26, 11, 46, 0.8);
+    --border-radius: 28px;
+    --border-radius-sm: 20px;
+    --border-radius-lg: 36px;
+    --border-radius-pill: 999px;
+    --btn-depth: 8px;
 }

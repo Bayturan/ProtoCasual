@@ -1,19 +1,28 @@
 /* ProtoCasual Theme — Racing
-   Dark, bold, neon accents with sharp edges. */
+   Dark & bold, neon accents, tighter radii for speed feel.
+   Track-based with vehicles. */
 
 :root {
-    --color-bg: #0a0a0a;
-    --color-surface: #1a1a1a;
+    --color-bg: #0c0c14;
+    --color-surface: #1c1c2e;
     --color-primary: #00e5ff;
+    --color-primary-dark: #009db3;
     --color-secondary: #76ff03;
+    --color-secondary-dark: #4db300;
     --color-accent: #ff1744;
-    --color-text: #e0e0e0;
+    --color-accent-dark: #c0102e;
+    --color-text: #eaeaea;
     --color-text-secondary: #757575;
     --color-success: #76ff03;
+    --color-success-dark: #4db300;
     --color-danger: #ff1744;
+    --color-danger-dark: #c0102e;
     --color-warning: #ffea00;
+    --color-warning-dark: #c9b800;
     --color-overlay: rgba(0, 0, 0, 0.85);
-    --border-radius: 4px;
-    --border-radius-sm: 2px;
-    --border-radius-lg: 8px;
+    --border-radius: 14px;
+    --border-radius-sm: 8px;
+    --border-radius-lg: 20px;
+    --border-radius-pill: 999px;
+    --btn-depth: 5px;
 }

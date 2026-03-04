@@ -1,19 +1,28 @@
 /* ProtoCasual Theme — Endless Runner
-   Deep space gradients, retro-warm neon accents. */
+   Deep space feel, retro-warm neon accents.
+   Infinite runner / procedural. */
 
 :root {
     --color-bg: #0f0c29;
     --color-surface: #302b63;
     --color-primary: #24c6dc;
+    --color-primary-dark: #17899a;
     --color-secondary: #514a9d;
+    --color-secondary-dark: #38336e;
     --color-accent: #f5af19;
+    --color-accent-dark: #c08812;
     --color-text: #eaeaea;
     --color-text-secondary: #a8a5c5;
     --color-success: #24c6dc;
+    --color-success-dark: #17899a;
     --color-danger: #eb4d4b;
+    --color-danger-dark: #b83836;
     --color-warning: #f5af19;
-    --color-overlay: rgba(15, 12, 41, 0.85);
-    --border-radius: 10px;
-    --border-radius-sm: 6px;
-    --border-radius-lg: 14px;
+    --color-warning-dark: #c08812;
+    --color-overlay: rgba(15, 12, 41, 0.8);
+    --border-radius: 22px;
+    --border-radius-sm: 16px;
+    --border-radius-lg: 30px;
+    --border-radius-pill: 999px;
+    --btn-depth: 7px;
 }

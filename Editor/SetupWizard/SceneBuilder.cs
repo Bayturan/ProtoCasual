@@ -167,9 +167,15 @@ namespace ProtoCasual.Editor
         {
             var so = new SerializedObject(manager);
 
-            // Screens
-            SetAsset<VisualTreeAsset>(so, "mainScreenLayout",      $"{PKG_UI}/UXML/MainScreen.uxml");
-            SetAsset<VisualTreeAsset>(so, "gameplayScreenLayout",   $"{PKG_UI}/UXML/GameplayScreen.uxml");
+            // Game-type-specific MainScreen & GameplayScreen
+            string gameTypeFolder = GetGameTypeFolder(cfg.gameType);
+
+            SetAsset<VisualTreeAsset>(so, "mainScreenLayout",
+                $"{PKG_UI}/UXML/{gameTypeFolder}/MainScreen.uxml");
+            SetAsset<VisualTreeAsset>(so, "gameplayScreenLayout",
+                $"{PKG_UI}/UXML/{gameTypeFolder}/GameplayScreen.uxml");
+
+            // Shared screens (same for all game types)
             SetAsset<VisualTreeAsset>(so, "winScreenLayout",        $"{PKG_UI}/UXML/WinScreen.uxml");
             SetAsset<VisualTreeAsset>(so, "loseScreenLayout",       $"{PKG_UI}/UXML/LoseScreen.uxml");
             SetAsset<VisualTreeAsset>(so, "pauseScreenLayout",      $"{PKG_UI}/UXML/PauseScreen.uxml");
@@ -264,6 +270,20 @@ namespace ProtoCasual.Editor
         // ═══════════════════════════════════════════════════════════════
 
         private static string GetThemeFileName(GameType type) => type switch
+        {
+            GameType.HyperCasual => "HyperCasual",
+            GameType.Puzzle      => "Puzzle",
+            GameType.Racing      => "Racing",
+            GameType.Endless     => "Endless",
+            GameType.Hybrid      => "Hybrid",
+            _                    => "HyperCasual"
+        };
+
+        /// <summary>
+        /// Returns the UXML subfolder name for game-type-specific MainScreen / GameplayScreen.
+        /// Falls back to root UXML folder if variant does not exist.
+        /// </summary>
+        private static string GetGameTypeFolder(GameType type) => type switch
         {
             GameType.HyperCasual => "HyperCasual",
             GameType.Puzzle      => "Puzzle",

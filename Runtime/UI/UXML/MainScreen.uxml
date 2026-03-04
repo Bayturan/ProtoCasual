@@ -15,15 +15,15 @@
         <!-- Center Content -->
         <ui:VisualElement class="screen-center">
             <ui:Label name="game-title" text="GAME TITLE" class="title-text" />
-            <ui:Label name="game-subtitle" text="Tap to Play" class="subtitle-text" />
+            <ui:Label name="game-subtitle" text="Tap to Play!" class="subtitle-text" />
         </ui:VisualElement>
 
         <!-- Buttons -->
         <ui:VisualElement class="button-column">
-            <ui:Button name="play-btn" text="PLAY" class="btn btn-primary btn-lg" />
+            <ui:Button name="play-btn" text="▶  PLAY" class="btn btn-primary btn-lg" />
             <ui:VisualElement class="button-row">
-                <ui:Button name="store-btn" text="STORE" class="btn btn-secondary" />
-                <ui:Button name="inventory-btn" text="INVENTORY" class="btn btn-secondary" />
+                <ui:Button name="store-btn" text="🛒  STORE" class="btn btn-secondary" />
+                <ui:Button name="inventory-btn" text="🎒  INVENTORY" class="btn btn-secondary" />
             </ui:VisualElement>
             <ui:Button name="settings-btn" text="⚙  SETTINGS" class="btn btn-tertiary" />
         </ui:VisualElement>

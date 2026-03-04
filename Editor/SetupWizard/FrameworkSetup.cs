@@ -340,6 +340,7 @@ namespace ProtoCasual.Editor
                 "• All configs created and wired to FrameworkConfig\n" +
                 "• GameBootstrap has FrameworkConfig assigned\n" +
                 "• UIToolkitManager UXML/USS auto-wired\n" +
+                $"• Game-type UI: {cfg.gameType} MainScreen + GameplayScreen\n" +
                 "• 8 GameEvent assets created\n" +
                 "• Theme USS copied to _Game/UI/Themes/ for customisation\n\n" +
                 "Next steps:\n" +
@@ -360,6 +361,7 @@ namespace ProtoCasual.Editor
             Debug.Log("───────────────────────────────────────────────────");
             Debug.Log($"  Game Name     : {cfg.gameName}");
             Debug.Log($"  Game Type     : {cfg.gameType}");
+            Debug.Log($"  UI Variant    : {cfg.gameType} (MainScreen + GameplayScreen)");
             Debug.Log($"  Map Type      : {cfg.mapType}");
             Debug.Log($"  Bots          : {cfg.bots}");
             Debug.Log($"  Monetization  : {cfg.monetization}");
@@ -393,7 +395,8 @@ namespace ProtoCasual.Editor
 
         private static int CountUIPrefabs(GameSetupConfig cfg)
         {
-            // MainScreen, SettingsScreen, GameplayScreen, PauseScreen, WinScreen, LoseScreen = 6 UXML
+            // Game-type MainScreen + GameplayScreen = 2 UXML
+            // Shared: WinScreen, LoseScreen, PauseScreen, SettingsScreen = 4 UXML
             // + Base USS + Components USS + Theme USS = 3 stylesheets
             int count = 9;
             if (cfg.store == StoreOption.Enabled) count += 2; // StoreScreen, InventoryScreen UXML

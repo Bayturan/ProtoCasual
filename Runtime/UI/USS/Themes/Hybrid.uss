@@ -1,19 +1,28 @@
 /* ProtoCasual Theme — Hybrid
-   Professional and balanced, modern dark UI. */
+   Professional and balanced, modern dark UI.
+   Level-based with depth, campaign + arcade. */
 
 :root {
-    --color-bg: #1e272e;
+    --color-bg: #1c2530;
     --color-surface: #2c3e50;
     --color-primary: #0984e3;
+    --color-primary-dark: #065a9e;
     --color-secondary: #00cec9;
+    --color-secondary-dark: #009a96;
     --color-accent: #fd79a8;
+    --color-accent-dark: #c6507f;
     --color-text: #dfe6e9;
     --color-text-secondary: #b2bec3;
     --color-success: #00b894;
+    --color-success-dark: #008c6e;
     --color-danger: #d63031;
+    --color-danger-dark: #a82425;
     --color-warning: #ffeaa7;
-    --color-overlay: rgba(30, 39, 46, 0.85);
-    --border-radius: 10px;
-    --border-radius-sm: 8px;
-    --border-radius-lg: 14px;
+    --color-warning-dark: #d4c07a;
+    --color-overlay: rgba(28, 37, 48, 0.8);
+    --border-radius: 20px;
+    --border-radius-sm: 14px;
+    --border-radius-lg: 28px;
+    --border-radius-pill: 999px;
+    --btn-depth: 6px;
 }

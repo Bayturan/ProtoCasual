@@ -2,12 +2,14 @@
     <ui:VisualElement name="gameplay-screen" class="screen gameplay-screen">
         <!-- Top HUD -->
         <ui:VisualElement class="hud-top">
-            <ui:Label name="score-text" text="Score: 0" class="hud-text" />
+            <ui:VisualElement class="hud-badge">
+                <ui:Label name="score-text" text="Score: 0" class="hud-badge-text" />
+            </ui:VisualElement>
             <ui:Label name="level-text" text="Level 1" class="hud-text hud-center" />
-            <ui:Button name="pause-btn" text="||" class="btn btn-icon" />
+            <ui:Button name="pause-btn" text="| |" class="btn btn-icon" />
         </ui:VisualElement>
 
-        <!-- Spacer pushes bottom HUD down -->
+        <!-- Spacer -->
         <ui:VisualElement class="hud-spacer" />
 
         <!-- Bottom HUD -->

@@ -2,21 +2,21 @@
     <ui:VisualElement name="inventory-screen" class="screen inventory-screen">
         <!-- Header -->
         <ui:VisualElement class="screen-header">
-            <ui:Label text="INVENTORY" class="header-title" />
+            <ui:Label text="🎒  INVENTORY" class="header-title" />
             <ui:Button name="close-btn" text="✕" class="btn btn-close" />
         </ui:VisualElement>
 
-        <!-- Body: stacked vertically for portrait mobile -->
+        <!-- Body -->
         <ui:ScrollView class="inventory-body">
             <!-- Empty State -->
             <ui:VisualElement name="empty-state" class="empty-state">
-                <ui:Label text="No items yet. Visit the Store!" class="empty-text" />
+                <ui:Label text="📦  No items yet. Visit the Store!" class="empty-text" />
             </ui:VisualElement>
 
             <!-- Item List -->
             <ui:ScrollView name="item-list" class="item-list" />
 
-            <!-- Detail Panel (appears below selected item) -->
+            <!-- Detail Panel -->
             <ui:VisualElement name="detail-panel" class="detail-panel">
                 <ui:Label name="detail-name" text="" class="detail-name" />
                 <ui:Label name="detail-description" text="" class="detail-desc" />

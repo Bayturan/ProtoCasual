@@ -1,19 +1,28 @@
 /* ProtoCasual Theme — Puzzle
-   Clean, minimal, soft pastel tones with light backgrounds. */
+   Clean pastel tones, light backgrounds, rounded but calmer.
+   Smart & satisfying. Grid/match mechanics. */
 
 :root {
-    --color-bg: #f0f4f8;
+    --color-bg: #eef2f7;
     --color-surface: #ffffff;
     --color-primary: #5b86e5;
+    --color-primary-dark: #3a5fc8;
     --color-secondary: #36d1dc;
+    --color-secondary-dark: #22a3b0;
     --color-accent: #ff7eb3;
+    --color-accent-dark: #d4568a;
     --color-text: #2d3436;
     --color-text-secondary: #636e72;
     --color-success: #00b894;
+    --color-success-dark: #008c6e;
     --color-danger: #d63031;
+    --color-danger-dark: #a82425;
     --color-warning: #fdcb6e;
-    --color-overlay: rgba(45, 52, 54, 0.7);
-    --border-radius: 8px;
-    --border-radius-sm: 6px;
-    --border-radius-lg: 12px;
+    --color-warning-dark: #d4a43a;
+    --color-overlay: rgba(45, 52, 54, 0.65);
+    --border-radius: 20px;
+    --border-radius-sm: 14px;
+    --border-radius-lg: 28px;
+    --border-radius-pill: 999px;
+    --btn-depth: 5px;
 }
