@@ -1,0 +1,36 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="main-screen" class="screen main-screen">
+        <!-- Currency Bar -->
+        <ui:VisualElement name="currency-bar" class="currency-bar">
+            <ui:VisualElement class="currency-item">
+                <ui:VisualElement class="currency-icon coin-icon" />
+                <ui:Label name="soft-currency" text="0" class="currency-text" />
+            </ui:VisualElement>
+            <ui:VisualElement class="currency-item">
+                <ui:VisualElement class="currency-icon gem-icon" />
+                <ui:Label name="hard-currency" text="0" class="currency-text" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Center — big title, tap to play -->
+        <ui:VisualElement class="screen-center">
+            <ui:Label name="game-title" text="GAME TITLE" class="title-text" />
+            <ui:Label name="game-subtitle" text="Tap to Play!" class="subtitle-text" />
+
+            <!-- Best score badge -->
+            <ui:VisualElement class="banner" style="margin-top: 24px;">
+                <ui:Label name="best-score" text="BEST: 0" class="banner-title" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Buttons — single giant PLAY, small row beneath -->
+        <ui:VisualElement class="button-column">
+            <ui:Button name="play-btn" text="▶  PLAY" class="btn btn-primary btn-lg" />
+            <ui:VisualElement class="button-row">
+                <ui:Button name="store-btn" text="🛒  STORE" class="btn btn-secondary" />
+                <ui:Button name="inventory-btn" text="🎒  BAG" class="btn btn-secondary" />
+            </ui:VisualElement>
+            <ui:Button name="settings-btn" text="⚙  SETTINGS" class="btn btn-tertiary" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

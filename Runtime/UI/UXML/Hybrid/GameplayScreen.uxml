@@ -1,0 +1,35 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="gameplay-screen" class="screen gameplay-screen">
+        <!-- Top HUD: full stats -->
+        <ui:VisualElement class="hud-top">
+            <ui:VisualElement class="hud-badge">
+                <ui:VisualElement class="hud-badge-icon" style="background-color: var(--color-primary);" />
+                <ui:Label name="score-text" text="Score: 0" class="hud-badge-text" />
+            </ui:VisualElement>
+
+            <ui:Label name="level-text" text="Level 1" class="hud-text hud-center" />
+
+            <ui:Button name="pause-btn" text="| |" class="btn btn-icon" />
+        </ui:VisualElement>
+
+        <!-- Objective banner -->
+        <ui:VisualElement class="banner" style="margin: 4px 0;">
+            <ui:Label name="objective-text" text="Collect 10 gems" class="banner-subtitle" />
+        </ui:VisualElement>
+
+        <!-- Gameplay area -->
+        <ui:VisualElement class="hud-spacer" />
+
+        <!-- Bottom HUD: time + coins + progress -->
+        <ui:VisualElement class="hud-bottom">
+            <ui:VisualElement class="hud-badge">
+                <ui:VisualElement class="hud-badge-icon" style="background-color: var(--color-warning);" />
+                <ui:Label name="coin-text" text="0" class="hud-badge-text" />
+            </ui:VisualElement>
+
+            <ui:Label name="time-text" text="Time: 0.0s" class="hud-text" />
+
+            <ui:ProgressBar name="progress-bar" title="" low-value="0" high-value="100" class="progress-bar" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

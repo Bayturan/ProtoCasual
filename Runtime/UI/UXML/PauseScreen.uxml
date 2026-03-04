@@ -2,11 +2,11 @@
     <ui:VisualElement name="pause-screen" class="screen overlay-screen pause-screen">
         <ui:VisualElement class="overlay-bg" />
         <ui:VisualElement class="overlay-panel">
-            <ui:Label text="PAUSED" class="panel-title" />
+            <ui:Label text="⏸  PAUSED" class="panel-title" />
             <ui:VisualElement class="button-column">
-                <ui:Button name="resume-btn" text="RESUME" class="btn btn-primary" />
-                <ui:Button name="restart-btn" text="RESTART" class="btn btn-secondary" />
-                <ui:Button name="menu-btn" text="QUIT" class="btn btn-tertiary" />
+                <ui:Button name="resume-btn" text="▶  RESUME" class="btn btn-primary btn-lg" />
+                <ui:Button name="restart-btn" text="🔄  RESTART" class="btn btn-secondary" />
+                <ui:Button name="menu-btn" text="🚪  QUIT" class="btn btn-tertiary" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

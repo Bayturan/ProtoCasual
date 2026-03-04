@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════
-   ProtoCasual — Component Styles
+   ProtoCasual — Component Styles  (Casual / Cartoonish)
    Mobile-first. Settings, shop, inventory, popups, etc.
    ═══════════════════════════════════════════════════════════ */
 
@@ -13,49 +13,55 @@
 .settings-group {
     background-color: var(--color-surface);
     border-radius: var(--border-radius);
-    padding: 20px;
+    padding: 22px 24px;
     margin-bottom: 20px;
+    border-bottom-width: 4px;
+    border-bottom-color: rgba(0, 0, 0, 0.2);
 }
 
 .setting-row {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 0;
-    min-height: 56px;
+    padding: 14px 0;
+    min-height: 60px;
 }
 
 .setting-label {
-    font-size: 22px;
+    font-size: 24px;
     color: var(--color-text);
 }
 
 /* Larger toggle for touch */
 .setting-toggle {
-    width: 64px;
-    min-height: 36px;
+    width: 68px;
+    min-height: 38px;
 }
 
 /* Wider slider for finger control */
 .setting-slider {
     flex-grow: 1;
     min-width: 180px;
-    max-width: 260px;
-    min-height: 36px;
+    max-width: 280px;
+    min-height: 38px;
 }
 
-/* Make slider dragger bigger for touch */
+/* Make slider dragger bigger and bubbly */
 .setting-slider .unity-base-slider__dragger {
-    width: 32px;
-    height: 32px;
-    border-radius: 16px;
-    margin-top: -12px;
+    width: 36px;
+    height: 36px;
+    border-radius: 18px;
+    margin-top: -14px;
+    background-color: var(--color-primary);
+    border-bottom-width: 3px;
+    border-bottom-color: var(--color-primary-dark);
 }
 
 .setting-slider .unity-base-slider__tracker {
-    height: 8px;
-    border-radius: 4px;
-    margin-top: -4px;
+    height: 10px;
+    border-radius: 5px;
+    margin-top: -5px;
+    background-color: rgba(255, 255, 255, 0.12);
 }
 
 /* ─── Shop / Inventory ───────────────────────────────────── */
@@ -75,76 +81,105 @@
 .store-item-card,
 .inventory-item-card {
     background-color: var(--color-surface);
-    border-radius: var(--border-radius-sm);
-    padding: 16px 20px;
-    margin-bottom: 10px;
+    border-radius: var(--border-radius);
+    padding: 18px 22px;
+    margin-bottom: 12px;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    min-height: 60px;
+    min-height: 68px;
+    border-bottom-width: 4px;
+    border-bottom-color: rgba(0, 0, 0, 0.2);
     transition-duration: 0.1s;
+    transition-property: scale, translate, border-bottom-width;
 }
 
 .store-item-card:hover,
 .inventory-item-card:hover {
-    background-color: rgba(52, 152, 219, 0.15);
+    scale: 1.02;
+    background-color: rgba(79, 195, 247, 0.1);
 }
 
-.item-owned {
-    opacity: 0.5;
+.store-item-card:active,
+.inventory-item-card:active {
+    scale: 0.98;
+    translate: 0 2px;
+    border-bottom-width: 1px;
 }
+
+.item-selected {
+    border-left-width: 3px;
+    border-left-color: var(--color-primary);
+}
+
+.item-owned { opacity: 0.5; }
 
 .item-name {
-    font-size: 22px;
+    font-size: 24px;
     color: var(--color-text);
     -unity-font-style: bold;
 }
 
 .item-price {
-    font-size: 20px;
+    font-size: 22px;
     color: var(--color-warning);
+    -unity-font-style: bold;
+}
+
+/* Item icon placeholder (color circle) */
+.item-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    background-color: rgba(255, 255, 255, 0.1);
+    margin-right: 14px;
+    border-bottom-width: 3px;
+    border-bottom-color: rgba(0, 0, 0, 0.15);
 }
 
 /* Detail panel stacks below list on mobile */
 .detail-panel {
-    padding: 20px;
+    padding: 24px;
     margin-top: 16px;
     background-color: var(--color-surface);
     border-radius: var(--border-radius);
+    border-bottom-width: 4px;
+    border-bottom-color: rgba(0, 0, 0, 0.2);
 }
 
 .detail-name {
-    font-size: 28px;
+    font-size: 30px;
     color: var(--color-text);
     -unity-font-style: bold;
     margin-bottom: 10px;
 }
 
 .detail-desc {
-    font-size: 20px;
+    font-size: 22px;
     color: var(--color-text-secondary);
-    margin-bottom: 16px;
+    margin-bottom: 18px;
     white-space: normal;
 }
 
 .detail-price {
-    font-size: 24px;
+    font-size: 26px;
     color: var(--color-warning);
     -unity-font-style: bold;
     margin-bottom: 20px;
 }
 
 .detail-stat {
-    font-size: 20px;
+    font-size: 22px;
     color: var(--color-text-secondary);
     margin-bottom: 6px;
 }
 
 .feedback-text {
-    font-size: 20px;
+    font-size: 22px;
     color: var(--color-success);
     -unity-text-align: middle-center;
-    margin-top: 12px;
+    margin-top: 14px;
+    -unity-font-style: bold;
 }
 
 /* ─── Empty State ────────────────────────────────────────── */
@@ -153,11 +188,11 @@
     flex-grow: 1;
     justify-content: center;
     align-items: center;
-    padding: 40px 20px;
+    padding: 48px 24px;
 }
 
 .empty-text {
-    font-size: 24px;
+    font-size: 26px;
     color: var(--color-text-secondary);
     -unity-text-align: middle-center;
 }
@@ -166,48 +201,45 @@
 
 .popup-overlay {
     position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
+    left: 0; right: 0; top: 0; bottom: 0;
     justify-content: center;
     align-items: center;
 }
 
 .popup-backdrop {
     position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
+    left: 0; right: 0; top: 0; bottom: 0;
     background-color: var(--color-overlay);
 }
 
 .popup-panel {
     background-color: var(--color-surface);
     border-radius: var(--border-radius-lg);
-    padding: 36px 28px;
+    padding: 40px 32px;
     align-items: center;
     margin: 0 24px;
     align-self: stretch;
+    border-bottom-width: 6px;
+    border-bottom-color: rgba(0, 0, 0, 0.3);
 }
 
 .popup-sm {
-    max-width: 480px;
+    max-width: 500px;
     align-self: center;
 }
 
 .popup-md {
-    max-width: 560px;
+    max-width: 580px;
     align-self: center;
 }
 
 .popup-title {
-    font-size: 36px;
+    font-size: 40px;
     color: var(--color-text);
     -unity-font-style: bold;
     -unity-text-align: middle-center;
     margin-bottom: 20px;
+    letter-spacing: 2px;
 }
 
 .reward-title {
@@ -215,16 +247,14 @@
 }
 
 .popup-message {
-    font-size: 22px;
+    font-size: 24px;
     color: var(--color-text-secondary);
     -unity-text-align: middle-center;
     margin-bottom: 28px;
     white-space: normal;
 }
 
-.popup-actions {
-    width: 100%;
-}
+.popup-actions { width: 100%; }
 
 .reward-list {
     margin-bottom: 24px;
@@ -232,8 +262,85 @@
 }
 
 .reward-entry {
-    font-size: 26px;
+    font-size: 28px;
     color: var(--color-success);
     -unity-font-style: bold;
     margin-bottom: 10px;
+    letter-spacing: 1px;
 }
+
+/* ─── Daily Reward Grid ──────────────────────────────────── */
+
+.daily-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 8px 0;
+}
+
+.daily-cell {
+    width: 120px;
+    height: 120px;
+    background-color: var(--color-surface);
+    border-radius: var(--border-radius);
+    margin: 6px;
+    align-items: center;
+    justify-content: center;
+    border-bottom-width: 4px;
+    border-bottom-color: rgba(0, 0, 0, 0.2);
+}
+
+.daily-cell-today {
+    border-left-width: 3px;
+    border-right-width: 3px;
+    border-top-width: 3px;
+    border-left-color: var(--color-primary);
+    border-right-color: var(--color-primary);
+    border-top-color: var(--color-primary);
+}
+
+.daily-cell-claimed {
+    opacity: 0.5;
+}
+
+.daily-cell-label {
+    font-size: 18px;
+    color: var(--color-text-secondary);
+    margin-bottom: 4px;
+}
+
+.daily-cell-reward {
+    font-size: 22px;
+    color: var(--color-warning);
+    -unity-font-style: bold;
+}
+
+/* ─── Tab Bar ────────────────────────────────────────────── */
+
+.tab-bar {
+    flex-direction: row;
+    margin-bottom: 16px;
+}
+
+.tab-btn {
+    flex-grow: 1;
+    min-height: 52px;
+    background-color: rgba(255, 255, 255, 0.06);
+    border-radius: 0;
+    border-bottom-width: 4px;
+    border-bottom-color: transparent;
+    font-size: 22px;
+    color: var(--color-text-secondary);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    padding: 12px 8px;
+}
+
+.tab-btn-active {
+    color: var(--color-text);
+    border-bottom-color: var(--color-primary);
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.tab-btn:first-child { border-top-left-radius: var(--border-radius-sm); }
+.tab-btn:last-child  { border-top-right-radius: var(--border-radius-sm); }

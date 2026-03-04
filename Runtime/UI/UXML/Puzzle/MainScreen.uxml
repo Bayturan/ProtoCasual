@@ -1,0 +1,44 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="main-screen" class="screen main-screen">
+        <!-- Currency Bar -->
+        <ui:VisualElement name="currency-bar" class="currency-bar">
+            <ui:VisualElement class="currency-item">
+                <ui:VisualElement class="currency-icon coin-icon" />
+                <ui:Label name="soft-currency" text="0" class="currency-text" />
+            </ui:VisualElement>
+            <ui:VisualElement class="currency-item">
+                <ui:VisualElement class="currency-icon gem-icon" />
+                <ui:Label name="hard-currency" text="0" class="currency-text" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Center — title + star/level progress -->
+        <ui:VisualElement class="screen-center">
+            <ui:Label name="game-title" text="PUZZLE GAME" class="title-text" />
+            <ui:Label name="game-subtitle" text="Train your brain!" class="subtitle-text" />
+
+            <!-- Level / Stars info -->
+            <ui:VisualElement class="banner" style="margin-top: 28px;">
+                <ui:Label name="best-score" text="⭐ 42 / 120 Stars" class="banner-title" />
+                <ui:Label text="Chapter 1 — Forest" class="banner-subtitle" />
+            </ui:VisualElement>
+
+            <!-- Star row decoration -->
+            <ui:VisualElement class="star-row" style="margin-top: 16px;">
+                <ui:VisualElement class="star star-earned" />
+                <ui:VisualElement class="star star-earned" />
+                <ui:VisualElement class="star" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Buttons -->
+        <ui:VisualElement class="button-column">
+            <ui:Button name="play-btn" text="▶  PLAY LEVEL" class="btn btn-primary btn-lg" />
+            <ui:VisualElement class="button-row">
+                <ui:Button name="store-btn" text="🛒  STORE" class="btn btn-secondary" />
+                <ui:Button name="inventory-btn" text="🎒  ITEMS" class="btn btn-secondary" />
+            </ui:VisualElement>
+            <ui:Button name="settings-btn" text="⚙  SETTINGS" class="btn btn-tertiary" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

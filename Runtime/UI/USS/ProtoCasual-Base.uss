@@ -1,24 +1,37 @@
 /* ═══════════════════════════════════════════════════════════
-   ProtoCasual — Base Styles
-   Mobile-first design (1080×1920 reference).
+   ProtoCasual — Base Styles  (Casual / Cartoonish)
+   Mobile-first · 1080×1920 reference
    Override CSS variables in theme USS files to reskin.
    ═══════════════════════════════════════════════════════════ */
 
 :root {
+    /* ── Palette ── */
     --color-bg: #1a1a2e;
     --color-surface: #16213e;
-    --color-primary: #3498db;
-    --color-secondary: #2ecc71;
-    --color-accent: #e94560;
+    --color-primary: #4fc3f7;
+    --color-primary-dark: #0388d1;
+    --color-secondary: #69f0ae;
+    --color-secondary-dark: #2bbd7e;
+    --color-accent: #ff6090;
+    --color-accent-dark: #c73060;
     --color-text: #ffffff;
-    --color-text-secondary: #aab2bd;
-    --color-success: #27ae60;
-    --color-danger: #e74c3c;
-    --color-warning: #f39c12;
-    --color-overlay: rgba(0, 0, 0, 0.75);
-    --border-radius: 16px;
-    --border-radius-sm: 12px;
-    --border-radius-lg: 24px;
+    --color-text-secondary: #b0bec5;
+    --color-success: #66bb6a;
+    --color-success-dark: #388e3c;
+    --color-danger: #ef5350;
+    --color-danger-dark: #c62828;
+    --color-warning: #ffd54f;
+    --color-warning-dark: #f9a825;
+    --color-overlay: rgba(0, 0, 0, 0.7);
+
+    /* ── Shape — large radii for bubbly casual look ── */
+    --border-radius: 24px;
+    --border-radius-sm: 18px;
+    --border-radius-lg: 32px;
+    --border-radius-pill: 999px;
+
+    /* ── 3-D button depth thickness ── */
+    --btn-depth: 6px;
 }
 
 /* ─── Screen ─────────────────────────────────────────────── */
@@ -26,15 +39,13 @@
 .screen {
     flex-grow: 1;
     background-color: var(--color-bg);
-    padding: 0 32px;
+    padding: 0 28px;
     /* Safe-area padding applied at runtime via UIToolkitManager */
     justify-content: space-between;
     align-items: stretch;
 }
 
-.screen-container {
-    flex-grow: 1;
-}
+.screen-container { flex-grow: 1; }
 
 .screen-center {
     flex-grow: 1;
@@ -45,133 +56,162 @@
 /* ─── Typography ─────────────────────────────────────────── */
 
 .title-text {
-    font-size: 64px;
+    font-size: 72px;
     color: var(--color-text);
     -unity-font-style: bold;
     -unity-text-align: middle-center;
-    margin-bottom: 12px;
-    letter-spacing: 2px;
+    margin-bottom: 8px;
+    letter-spacing: 4px;
 }
 
 .subtitle-text {
-    font-size: 28px;
+    font-size: 30px;
     color: var(--color-text-secondary);
     -unity-text-align: middle-center;
+    letter-spacing: 1px;
 }
 
 .header-title {
-    font-size: 42px;
+    font-size: 44px;
     color: var(--color-text);
     -unity-font-style: bold;
+    letter-spacing: 2px;
 }
 
 .panel-title {
-    font-size: 52px;
+    font-size: 56px;
     color: var(--color-text);
     -unity-font-style: bold;
     -unity-text-align: middle-center;
-    margin-bottom: 32px;
+    margin-bottom: 28px;
+    letter-spacing: 3px;
 }
 
 .group-title {
-    font-size: 26px;
+    font-size: 28px;
     color: var(--color-primary);
     -unity-font-style: bold;
     margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom-width: 1px;
-    border-bottom-color: rgba(255, 255, 255, 0.1);
+    padding-bottom: 10px;
+    border-bottom-width: 2px;
+    border-bottom-color: rgba(255, 255, 255, 0.08);
 }
 
-/* ─── Buttons ────────────────────────────────────────────── */
-/* Min height 56px for comfortable touch targets (44pt @ 1.5x) */
+/* ─── Buttons (3-D raised, pill-shaped) ──────────────────── */
+/*  Bottom border acts as a shadow / depth layer.
+    On :active  the depth shrinks and the button shifts down
+    giving a satisfying "press" feel.                          */
 
 .btn {
-    min-height: 56px;
-    padding: 16px 36px;
-    border-radius: var(--border-radius);
+    min-height: 60px;
+    padding: 16px 40px;
+    border-radius: var(--border-radius-pill);
     border-width: 0;
-    font-size: 24px;
+    border-bottom-width: var(--btn-depth);
+    font-size: 26px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
     color: var(--color-text);
-    transition-duration: 0.12s;
+    transition-duration: 0.1s;
+    transition-property: scale, translate, border-bottom-width;
 }
 
 .btn:hover {
-    scale: 1.03;
+    scale: 1.04;
 }
 
 .btn:active {
-    scale: 0.96;
-    opacity: 0.85;
+    scale: 0.97;
+    translate: 0 3px;
+    border-bottom-width: 2px;
 }
 
 .btn-primary {
     background-color: var(--color-primary);
+    border-bottom-color: var(--color-primary-dark);
 }
 
 .btn-secondary {
     background-color: var(--color-surface);
-    border-width: 2px;
-    border-color: var(--color-primary);
+    border-bottom-color: rgba(0, 0, 0, 0.35);
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-left-color: var(--color-primary);
+    border-right-color: var(--color-primary);
+    border-top-color: var(--color-primary);
 }
 
 .btn-tertiary {
-    background-color: transparent;
+    background-color: rgba(255, 255, 255, 0.06);
+    border-bottom-color: rgba(0, 0, 0, 0.15);
     color: var(--color-text-secondary);
-    min-height: 48px;
+    min-height: 52px;
+    border-bottom-width: 4px;
 }
 
 .btn-accent {
     background-color: var(--color-accent);
+    border-bottom-color: var(--color-accent-dark);
 }
 
 .btn-danger {
     background-color: var(--color-danger);
+    border-bottom-color: var(--color-danger-dark);
+}
+
+.btn-success {
+    background-color: var(--color-success);
+    border-bottom-color: var(--color-success-dark);
 }
 
 .btn-lg {
-    min-height: 72px;
-    padding: 20px 48px;
-    font-size: 32px;
-    border-radius: var(--border-radius-lg);
+    min-height: 76px;
+    padding: 20px 52px;
+    font-size: 34px;
+    border-radius: var(--border-radius-pill);
+    border-bottom-width: 8px;
+}
+
+.btn-lg:active {
+    border-bottom-width: 2px;
+    translate: 0 6px;
 }
 
 .btn-icon {
-    width: 56px;
-    height: 56px;
-    min-height: 56px;
+    width: 60px;
+    height: 60px;
+    min-height: 60px;
     padding: 0;
     font-size: 28px;
-    border-radius: 28px;
+    border-radius: 30px;
     background-color: var(--color-surface);
+    border-bottom-width: 4px;
+    border-bottom-color: rgba(0, 0, 0, 0.3);
 }
 
 .btn-close {
-    width: 48px;
-    height: 48px;
-    min-height: 48px;
+    width: 52px;
+    height: 52px;
+    min-height: 52px;
     padding: 0;
-    font-size: 24px;
-    border-radius: 24px;
-    background-color: rgba(255, 255, 255, 0.1);
+    font-size: 26px;
+    border-radius: 26px;
+    background-color: rgba(255, 255, 255, 0.12);
+    border-bottom-width: 3px;
+    border-bottom-color: rgba(0, 0, 0, 0.2);
 }
 
-.btn:disabled {
-    opacity: 0.4;
-}
+.btn:disabled { opacity: 0.4; }
 
 /* ─── Layouts ────────────────────────────────────────────── */
 
 .button-column {
     align-items: stretch;
-    padding: 20px 24px;
+    padding: 16px 20px;
 }
 
-.button-column > .btn {
-    margin-bottom: 16px;
-}
+.button-column > .btn { margin-bottom: 18px; }
 
 .button-row {
     flex-direction: row;
@@ -179,7 +219,7 @@
 }
 
 .button-row > .btn {
-    margin: 0 8px;
+    margin: 0 10px;
     flex-grow: 1;
 }
 
@@ -189,11 +229,11 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 20px;
-    border-bottom-width: 1px;
-    border-bottom-color: rgba(255, 255, 255, 0.08);
-    margin-bottom: 20px;
-    min-height: 56px;
+    padding-bottom: 16px;
+    border-bottom-width: 2px;
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+    margin-bottom: 16px;
+    min-height: 60px;
 }
 
 /* ─── HUD ────────────────────────────────────────────────── */
@@ -202,19 +242,17 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 0;
+    padding: 6px 0;
 }
 
 .hud-bottom {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    padding-top: 12px;
+    padding-top: 10px;
 }
 
-.hud-spacer {
-    flex-grow: 1;
-}
+.hud-spacer { flex-grow: 1; }
 
 .hud-text {
     font-size: 28px;
@@ -222,8 +260,31 @@
     -unity-font-style: bold;
 }
 
-.hud-center {
-    -unity-text-align: middle-center;
+.hud-center { -unity-text-align: middle-center; }
+
+/* ─── HUD Pill Badges ────────────────────────────────────── */
+/* Rounded chip used in gameplay HUDs (score, distance, etc.) */
+
+.hud-badge {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.45);
+    border-radius: var(--border-radius-pill);
+    padding: 8px 20px;
+    min-height: 44px;
+}
+
+.hud-badge-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 14px;
+    margin-right: 10px;
+}
+
+.hud-badge-text {
+    font-size: 24px;
+    color: var(--color-text);
+    -unity-font-style: bold;
 }
 
 /* ─── Currency Bar ───────────────────────────────────────── */
@@ -238,29 +299,26 @@
     flex-direction: row;
     align-items: center;
     background-color: var(--color-surface);
-    border-radius: var(--border-radius-sm);
-    padding: 10px 16px;
+    border-radius: var(--border-radius-pill);
+    padding: 10px 18px;
     margin-left: 12px;
-    min-height: 44px;
+    min-height: 48px;
+    border-bottom-width: 3px;
+    border-bottom-color: rgba(0, 0, 0, 0.25);
 }
 
 .currency-icon {
-    width: 28px;
-    height: 28px;
-    border-radius: 14px;
+    width: 30px;
+    height: 30px;
+    border-radius: 15px;
     margin-right: 10px;
 }
 
-.coin-icon {
-    background-color: var(--color-warning);
-}
-
-.gem-icon {
-    background-color: var(--color-accent);
-}
+.coin-icon { background-color: var(--color-warning); }
+.gem-icon  { background-color: var(--color-accent); }
 
 .currency-text {
-    font-size: 22px;
+    font-size: 24px;
     color: var(--color-text);
     -unity-font-style: bold;
 }
@@ -269,16 +327,11 @@
 
 .overlay-bg {
     position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
+    left: 0; right: 0; top: 0; bottom: 0;
     background-color: var(--color-overlay);
 }
 
-.overlay-screen {
-    position: relative;
-}
+.overlay-screen { position: relative; }
 
 .overlay-panel {
     align-self: center;
@@ -286,11 +339,13 @@
     align-items: center;
     background-color: var(--color-surface);
     border-radius: var(--border-radius-lg);
-    padding: 40px 32px;
+    padding: 44px 36px;
     margin-top: auto;
     margin-bottom: auto;
-    margin-left: 24px;
-    margin-right: 24px;
+    margin-left: 20px;
+    margin-right: 20px;
+    border-bottom-width: 6px;
+    border-bottom-color: rgba(0, 0, 0, 0.25);
 }
 
 /* ─── Result Screens ─────────────────────────────────────── */
@@ -307,44 +362,106 @@
     background-color: var(--color-surface);
     border-radius: var(--border-radius-lg);
     padding: 48px 32px;
-    margin: 0 16px;
+    margin: 0 12px;
+    border-bottom-width: 6px;
+    border-bottom-color: rgba(0, 0, 0, 0.25);
 }
 
 .result-title {
-    font-size: 56px;
+    font-size: 60px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
+    letter-spacing: 3px;
 }
 
-.win-title { color: var(--color-success); }
+.win-title  { color: var(--color-success); }
 .lose-title { color: var(--color-danger); }
 
 .result-stats {
-    margin-bottom: 32px;
+    margin-bottom: 28px;
     align-items: center;
 }
 
 .stat-text {
-    font-size: 26px;
+    font-size: 28px;
     color: var(--color-text-secondary);
     margin-bottom: 8px;
+}
+
+/* ─── Stars row (win/complete screens) ───────────────────── */
+
+.star-row {
+    flex-direction: row;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.star {
+    width: 56px;
+    height: 56px;
+    border-radius: 28px;
+    margin: 0 8px;
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+.star-earned {
+    background-color: var(--color-warning);
+    border-bottom-width: 4px;
+    border-bottom-color: var(--color-warning-dark);
 }
 
 /* ─── Progress Bar ───────────────────────────────────────── */
 
 .progress-bar {
     flex-grow: 1;
-    max-width: 240px;
-    height: 20px;
+    max-width: 260px;
+    height: 24px;
 }
 
 .progress-bar .unity-progress-bar__background {
     background-color: var(--color-surface);
-    border-radius: 10px;
+    border-radius: 12px;
+    border-bottom-width: 3px;
+    border-bottom-color: rgba(0, 0, 0, 0.2);
 }
 
 .progress-bar .unity-progress-bar__progress {
     background-color: var(--color-primary);
-    border-radius: 10px;
+    border-radius: 12px;
+}
+
+/* ─── Decorative Banner (game-type specific headers) ─────── */
+
+.banner {
+    align-items: center;
+    padding: 16px 24px;
+    border-radius: var(--border-radius-lg);
+    background-color: var(--color-surface);
+    border-bottom-width: 4px;
+    border-bottom-color: rgba(0, 0, 0, 0.2);
+    margin-bottom: 20px;
+}
+
+.banner-title {
+    font-size: 30px;
+    -unity-font-style: bold;
+    color: var(--color-warning);
+    -unity-text-align: middle-center;
+}
+
+.banner-subtitle {
+    font-size: 20px;
+    color: var(--color-text-secondary);
+    -unity-text-align: middle-center;
+}
+
+/* ─── Icon placeholder (used for HUD icons) ──────────────── */
+
+.icon-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 0.15);
+    margin-right: 10px;
 }

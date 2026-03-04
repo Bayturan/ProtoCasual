@@ -1,0 +1,33 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="gameplay-screen" class="screen gameplay-screen">
+        <!-- Top HUD: moves / stars / pause -->
+        <ui:VisualElement class="hud-top">
+            <ui:VisualElement class="hud-badge">
+                <ui:VisualElement class="hud-badge-icon" style="background-color: var(--color-primary);" />
+                <ui:Label name="score-text" text="Moves: 0" class="hud-badge-text" />
+            </ui:VisualElement>
+
+            <!-- Stars earned -->
+            <ui:VisualElement class="star-row" style="margin-bottom: 0;">
+                <ui:VisualElement class="star" style="width: 36px; height: 36px;" />
+                <ui:VisualElement class="star" style="width: 36px; height: 36px;" />
+                <ui:VisualElement class="star" style="width: 36px; height: 36px;" />
+            </ui:VisualElement>
+
+            <ui:Button name="pause-btn" text="| |" class="btn btn-icon" />
+        </ui:VisualElement>
+
+        <!-- Level label -->
+        <ui:Label name="level-text" text="Level 1" class="hud-text hud-center" style="margin-top: 4px;" />
+
+        <!-- Gameplay area -->
+        <ui:VisualElement class="hud-spacer" />
+
+        <!-- Bottom: timer + hint -->
+        <ui:VisualElement class="hud-bottom">
+            <ui:Label name="time-text" text="Time: 0s" class="hud-text" />
+            <ui:ProgressBar name="progress-bar" title="" low-value="0" high-value="100" class="progress-bar" />
+            <ui:Button name="hint-btn" text="💡" class="btn btn-icon" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

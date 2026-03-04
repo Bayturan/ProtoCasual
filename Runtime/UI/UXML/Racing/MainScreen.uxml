@@ -1,0 +1,47 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="main-screen" class="screen main-screen">
+        <!-- Currency Bar -->
+        <ui:VisualElement name="currency-bar" class="currency-bar">
+            <ui:VisualElement class="currency-item">
+                <ui:VisualElement class="currency-icon coin-icon" />
+                <ui:Label name="soft-currency" text="0" class="currency-text" />
+            </ui:VisualElement>
+            <ui:VisualElement class="currency-item">
+                <ui:VisualElement class="currency-icon gem-icon" />
+                <ui:Label name="hard-currency" text="0" class="currency-text" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Center — car / track preview area -->
+        <ui:VisualElement class="screen-center">
+            <ui:Label name="game-title" text="RACING" class="title-text" />
+            <ui:Label name="game-subtitle" text="Ready to race?" class="subtitle-text" />
+
+            <!-- Car display placeholder -->
+            <ui:VisualElement class="banner" style="margin-top: 24px; flex-direction: row; justify-content: space-between;">
+                <ui:VisualElement style="align-items: center;">
+                    <ui:Label text="🏎  SPEED" class="banner-subtitle" />
+                    <ui:Label name="stat-speed" text="85" class="banner-title" />
+                </ui:VisualElement>
+                <ui:VisualElement style="align-items: center;">
+                    <ui:Label text="🛞  GRIP" class="banner-subtitle" />
+                    <ui:Label name="stat-grip" text="70" class="banner-title" />
+                </ui:VisualElement>
+                <ui:VisualElement style="align-items: center;">
+                    <ui:Label text="⚡  BOOST" class="banner-subtitle" />
+                    <ui:Label name="stat-boost" text="60" class="banner-title" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Buttons -->
+        <ui:VisualElement class="button-column">
+            <ui:Button name="play-btn" text="🏁  RACE!" class="btn btn-primary btn-lg" />
+            <ui:VisualElement class="button-row">
+                <ui:Button name="store-btn" text="🛒  GARAGE" class="btn btn-secondary" />
+                <ui:Button name="inventory-btn" text="🏆  TROPHIES" class="btn btn-secondary" />
+            </ui:VisualElement>
+            <ui:Button name="settings-btn" text="⚙  SETTINGS" class="btn btn-tertiary" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

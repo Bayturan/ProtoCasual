@@ -1,0 +1,44 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="main-screen" class="screen main-screen">
+        <!-- Currency Bar -->
+        <ui:VisualElement name="currency-bar" class="currency-bar">
+            <ui:VisualElement class="currency-item">
+                <ui:VisualElement class="currency-icon coin-icon" />
+                <ui:Label name="soft-currency" text="0" class="currency-text" />
+            </ui:VisualElement>
+            <ui:VisualElement class="currency-item">
+                <ui:VisualElement class="currency-icon gem-icon" />
+                <ui:Label name="hard-currency" text="0" class="currency-text" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Center — campaign / modes -->
+        <ui:VisualElement class="screen-center">
+            <ui:Label name="game-title" text="MY GAME" class="title-text" />
+            <ui:Label name="game-subtitle" text="Choose your mode" class="subtitle-text" />
+
+            <!-- Level / progress -->
+            <ui:VisualElement class="banner" style="margin-top: 24px;">
+                <ui:Label text="📍  CAMPAIGN PROGRESS" class="banner-subtitle" />
+                <ui:Label name="best-score" text="Level 12 — 42%" class="banner-title" style="font-size: 26px;" />
+                <ui:ProgressBar name="campaign-progress" title="" low-value="0" high-value="100" class="progress-bar" style="margin-top: 8px; max-width: 400px;" />
+            </ui:VisualElement>
+
+            <!-- Mode selector buttons -->
+            <ui:VisualElement class="button-row" style="margin-top: 20px;">
+                <ui:Button name="mode-campaign-btn" text="📖  CAMPAIGN" class="btn btn-primary" />
+                <ui:Button name="mode-arcade-btn" text="🎮  ARCADE" class="btn btn-accent" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Buttons -->
+        <ui:VisualElement class="button-column">
+            <ui:Button name="play-btn" text="▶  PLAY" class="btn btn-success btn-lg" />
+            <ui:VisualElement class="button-row">
+                <ui:Button name="store-btn" text="🛒  STORE" class="btn btn-secondary" />
+                <ui:Button name="inventory-btn" text="🎒  INVENTORY" class="btn btn-secondary" />
+            </ui:VisualElement>
+            <ui:Button name="settings-btn" text="⚙  SETTINGS" class="btn btn-tertiary" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

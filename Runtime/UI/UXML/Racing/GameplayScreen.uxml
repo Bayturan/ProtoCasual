@@ -1,0 +1,31 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="gameplay-screen" class="screen gameplay-screen">
+        <!-- Top HUD: position + laps + pause -->
+        <ui:VisualElement class="hud-top">
+            <ui:VisualElement class="hud-badge">
+                <ui:Label name="score-text" text="1st" class="hud-badge-text" />
+            </ui:VisualElement>
+
+            <ui:VisualElement class="hud-badge">
+                <ui:Label name="level-text" text="Lap 1/3" class="hud-badge-text" />
+            </ui:VisualElement>
+
+            <ui:Button name="pause-btn" text="| |" class="btn btn-icon" />
+        </ui:VisualElement>
+
+        <!-- Gameplay area -->
+        <ui:VisualElement class="hud-spacer" />
+
+        <!-- Bottom HUD: speedometer + time + progress -->
+        <ui:VisualElement class="hud-bottom">
+            <ui:VisualElement class="hud-badge" style="min-width: 140px;">
+                <ui:Label name="speed-text" text="0" class="hud-badge-text" style="font-size: 36px;" />
+                <ui:Label text=" km/h" class="hud-badge-text" style="font-size: 18px;" />
+            </ui:VisualElement>
+
+            <ui:Label name="time-text" text="00:00.0" class="hud-text" />
+
+            <ui:ProgressBar name="progress-bar" title="" low-value="0" high-value="100" class="progress-bar" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

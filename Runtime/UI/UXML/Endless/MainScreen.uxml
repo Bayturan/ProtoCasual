@@ -1,0 +1,43 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="main-screen" class="screen main-screen">
+        <!-- Currency Bar -->
+        <ui:VisualElement name="currency-bar" class="currency-bar">
+            <ui:VisualElement class="currency-item">
+                <ui:VisualElement class="currency-icon coin-icon" />
+                <ui:Label name="soft-currency" text="0" class="currency-text" />
+            </ui:VisualElement>
+            <ui:VisualElement class="currency-item">
+                <ui:VisualElement class="currency-icon gem-icon" />
+                <ui:Label name="hard-currency" text="0" class="currency-text" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Center — high score, distance -->
+        <ui:VisualElement class="screen-center">
+            <ui:Label name="game-title" text="ENDLESS RUN" class="title-text" />
+            <ui:Label name="game-subtitle" text="How far can you go?" class="subtitle-text" />
+
+            <!-- Best distance badge -->
+            <ui:VisualElement class="banner" style="margin-top: 28px;">
+                <ui:Label text="🏅  BEST DISTANCE" class="banner-subtitle" />
+                <ui:Label name="best-score" text="1,234 m" class="banner-title" />
+            </ui:VisualElement>
+
+            <!-- Daily challenge -->
+            <ui:VisualElement class="banner" style="margin-top: 12px;">
+                <ui:Label text="📅  DAILY CHALLENGE" class="banner-subtitle" />
+                <ui:Label name="daily-target" text="Reach 500 m" class="banner-title" style="font-size: 24px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Buttons -->
+        <ui:VisualElement class="button-column">
+            <ui:Button name="play-btn" text="🚀  RUN!" class="btn btn-primary btn-lg" />
+            <ui:VisualElement class="button-row">
+                <ui:Button name="store-btn" text="🛒  STORE" class="btn btn-secondary" />
+                <ui:Button name="inventory-btn" text="🎒  ITEMS" class="btn btn-secondary" />
+            </ui:VisualElement>
+            <ui:Button name="settings-btn" text="⚙  SETTINGS" class="btn btn-tertiary" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

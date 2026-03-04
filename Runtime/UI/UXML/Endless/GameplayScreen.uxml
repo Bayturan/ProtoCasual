@@ -1,0 +1,37 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="gameplay-screen" class="screen gameplay-screen">
+        <!-- Top HUD: distance + coins + pause -->
+        <ui:VisualElement class="hud-top">
+            <ui:VisualElement class="hud-badge">
+                <ui:VisualElement class="hud-badge-icon" style="background-color: var(--color-success);" />
+                <ui:Label name="score-text" text="0 m" class="hud-badge-text" />
+            </ui:VisualElement>
+
+            <ui:VisualElement class="hud-badge">
+                <ui:VisualElement class="hud-badge-icon" style="background-color: var(--color-warning);" />
+                <ui:Label name="coin-text" text="0" class="hud-badge-text" />
+            </ui:VisualElement>
+
+            <ui:Button name="pause-btn" text="| |" class="btn btn-icon" />
+        </ui:VisualElement>
+
+        <!-- Level / multiplier -->
+        <ui:Label name="level-text" text="" class="hud-text hud-center" style="margin-top: 8px;" />
+
+        <!-- Gameplay area -->
+        <ui:VisualElement class="hud-spacer" />
+
+        <!-- Bottom HUD: power-up slots + time -->
+        <ui:VisualElement class="hud-bottom">
+            <!-- Power-up slots -->
+            <ui:VisualElement name="powerup-bar" style="flex-direction: row;">
+                <ui:VisualElement class="icon-placeholder" />
+                <ui:VisualElement class="icon-placeholder" />
+                <ui:VisualElement class="icon-placeholder" />
+            </ui:VisualElement>
+
+            <ui:Label name="time-text" text="" class="hud-text" />
+            <ui:ProgressBar name="progress-bar" title="" low-value="0" high-value="100" class="progress-bar" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

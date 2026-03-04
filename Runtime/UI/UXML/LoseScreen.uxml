@@ -2,9 +2,15 @@
     <ui:VisualElement name="lose-screen" class="screen result-screen lose-screen">
         <ui:VisualElement class="overlay-bg" />
         <ui:VisualElement class="result-panel">
-            <ui:Label text="GAME OVER" class="result-title lose-title" />
+            <ui:Label text="💔  GAME OVER" class="result-title lose-title" />
+
+            <!-- Score summary -->
+            <ui:VisualElement class="result-stats">
+                <ui:Label name="score-text" text="Score: 0" class="stat-text" />
+            </ui:VisualElement>
+
             <ui:VisualElement class="button-column">
-                <ui:Button name="retry-btn" text="RETRY" class="btn btn-primary btn-lg" />
+                <ui:Button name="retry-btn" text="🔄  RETRY" class="btn btn-primary btn-lg" />
                 <ui:Button name="watch-ad-btn" text="▶  WATCH AD TO REVIVE" class="btn btn-accent" />
                 <ui:Button name="menu-btn" text="MENU" class="btn btn-tertiary" />
             </ui:VisualElement>
